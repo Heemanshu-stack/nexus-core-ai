@@ -673,3 +673,171 @@ body {
     gap: 6px;
 }
 
+
+/* ===== RESULT BANNER ===== */
+.result-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(37, 99, 235, 0.1));
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 14px;
+    animation: resultPulse 2s ease-in-out infinite;
+}
+
+@keyframes resultPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    50% { box-shadow: 0 0 18px 3px rgba(16, 185, 129, 0.2); }
+}
+
+.result-banner-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.result-banner-text {
+    flex: 1;
+}
+
+.result-banner-text strong {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.result-banner-text p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.btn-result {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+    transition: all 0.2s ease;
+}
+
+.btn-result:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.5);
+}
+
+/* ===== RESULT MODAL ===== */
+.result-modal-box {
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    width: 95%;
+    max-width: 820px;
+    padding: 24px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.result-iframe-wrap {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #030712;
+}
+
+.result-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+/* ===== PLAN BODY ===== */
+.plan-body {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.plan-summary {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+}
+
+.plan-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.plan-list li {
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    font-size: 0.84rem;
+    counter-increment: item;
+}
+
+/* ===== BADGE DANGER ===== */
+.badge-danger { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+
+/* ===== BTN LG ===== */
+.btn-lg {
+    padding: 12px 22px;
+    font-size: 0.95rem;
+}
+
+/* ===== STATUS VARIANTS ===== */
+.status-running .status-dot { background: var(--warning); box-shadow: 0 0 10px var(--warning); animation: pulse 1s infinite; }
+.status-waiting .status-dot { background: var(--warning); box-shadow: 0 0 10px var(--warning); animation: pulse 0.8s infinite; }
+.status-ready .status-dot { background: var(--success); box-shadow: 0 0 10px var(--success); }
+
+/* ===== HERO GLOW ===== */
+.hero-glow {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-60%);
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hero-glow-2 {
+    left: 60%;
+    background: radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-actions {
+    margin-top: 24px;
+}

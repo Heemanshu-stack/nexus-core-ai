@@ -1,7 +1,9 @@
 ﻿{
   "rewrites": [
-    { "source": "/", "destination": "/static/index.html" },
-    { "source": "/calculator", "destination": "/static/calculator.html" },
+    { "source": "/static/style.css", "destination": "/style.css" },
+    { "source": "/static/app.js", "destination": "/app.js" },
+    { "source": "/static/:file", "destination": "/:file" },
+    { "source": "/calculator", "destination": "/calculator.html" },
     { "source": "/api/health", "destination": "/api/health.js" },
     { "source": "/api/models/(.*)", "destination": "/api/models.js" },
     { "source": "/api/calculator", "destination": "/api/calculator.js" },

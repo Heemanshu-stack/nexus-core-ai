@@ -1,0 +1,14 @@
+{
+  "task_id": "test-session-123",
+  "prompt": "Test prompt",
+  "created_at": 1786712795.2687957,
+  "status": "INITIALIZED",
+  "current_agent": "Orchestrator",
+  "handoff_history": [],
+  "logs": [],
+  "task_plan": null,
+  "code_diff": null,
+  "review_result": null,
+  "test_result": null,
+  "pr_result": null
+}

@@ -1,0 +1,165 @@
+{
+  "task_id": "task-6a47e3b4",
+  "prompt": "Build an arcade Snake game in static/game_snake.html with glowing neon graphics",
+  "created_at": 1789036527.875182,
+  "status": "FAILED",
+  "current_agent": "System",
+  "handoff_history": [
+    {
+      "timestamp": "16:05:31",
+      "from": "OrchestratorAgent",
+      "to": "RepoSearcherAgent",
+      "reason": "Investigate workspace code structure and AST definitions"
+    },
+    {
+      "timestamp": "16:05:31",
+      "from": "RepoSearcherAgent",
+      "to": "CoderAgent",
+      "reason": "Synthesize code fixes and modifications based on repository context"
+    }
+  ],
+  "logs": [
+    {
+      "timestamp": "16:05:27",
+      "agent": "System",
+      "message": "Starting multi-agent engineering workflow...",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "16:05:27",
+      "agent": "OrchestratorAgent",
+      "message": "Analyzing task requirements: 'Build an arcade Snake game in static/game_snake.html with glowing neon graphics'",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "16:05:30",
+      "agent": "OrchestratorAgent",
+      "message": "Model 'llama-3.3-70b-versatile' warning: Error code: 404 - {'error': {'message': 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:30",
+      "agent": "OrchestratorAgent",
+      "message": "Model 'deepseek-r1-distill-llama-70b' warning: Error code: 400 - {'error': {'message': 'The model `deepseek-r1-distill-llama-70b` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:30",
+      "agent": "OrchestratorAgent",
+      "message": "Model 'llama-3.1-8b-instant' warning: Error code: 404 - {'error': {'message': 'The model `llama-3.1-8b-instant` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "OrchestratorAgent",
+      "message": "Model 'mixtral-8x7b-32768' warning: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "OrchestratorAgent",
+      "message": "Plan generated with 5 steps.",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "RepoSearcherAgent",
+      "message": "Scanning workspace directory and parsing AST...",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "RepoSearcherAgent",
+      "message": "Found 34 source files. Analyzed AST for 5 modules.",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "CoderAgent",
+      "message": "Synthesizing code solution for task...",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "CoderAgent",
+      "message": "Model 'llama-3.3-70b-versatile' rate/api note: Error code: 404 - {'error': {'message': 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "CoderAgent",
+      "message": "Model 'deepseek-r1-distill-llama-70b' rate/api note: Error code: 400 - {'error': {'message': 'The model `deepseek-r1-distill-llama-70b` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "CoderAgent",
+      "message": "Model 'llama-3.1-8b-instant' rate/api note: Error code: 404 - {'error': {'message': 'The model `llama-3.1-8b-instant` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "CoderAgent",
+      "message": "Model 'mixtral-8x7b-32768' rate/api note: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "16:05:31",
+      "agent": "System",
+      "message": "Pipeline error: All LLM models in fallback chain failed.",
+      "level": "ERROR"
+    }
+  ],
+  "task_plan": {
+    "task_id": "task-6a47e3b4",
+    "original_prompt": "Build an arcade Snake game in static/game_snake.html with glowing neon graphics",
+    "summary": "Automated engineering task for: Build an arcade Snake game in static/game_snake.html with glowing neon graphics",
+    "steps": [
+      {
+        "step_number": 1,
+        "assigned_agent": "RepoSearcherAgent",
+        "action_summary": "Scan workspace for target files",
+        "target_files": [
+          "main.py"
+        ]
+      },
+      {
+        "step_number": 2,
+        "assigned_agent": "CoderAgent",
+        "action_summary": "Synthesize code fixes and tests",
+        "target_files": [
+          "main.py"
+        ]
+      },
+      {
+        "step_number": 3,
+        "assigned_agent": "ReviewerAgent",
+        "action_summary": "Review synthesized diff",
+        "target_files": [
+          "main.py"
+        ]
+      },
+      {
+        "step_number": 4,
+        "assigned_agent": "TesterAgent",
+        "action_summary": "Execute pytest validation suite",
+        "target_files": [
+          "tests/test_main.py"
+        ]
+      },
+      {
+        "step_number": 5,
+        "assigned_agent": "DocWriterAgent",
+        "action_summary": "Write documentation & PR summary",
+        "target_files": [
+          "README.md"
+        ]
+      }
+    ],
+    "estimated_complexity": "Medium"
+  },
+  "code_diff": null,
+  "review_result": null,
+  "test_result": null,
+  "pr_result": null
+}

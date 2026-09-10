@@ -1,0 +1,135 @@
+{
+  "task_id": "task-1b0e99b7",
+  "prompt": "\"Build a fast 2D Space Jet Defender game in static/game_space.html with HTML5 Canvas, enemy fleet waves, laser firing, and health HUD.\"",
+  "created_at": 1785765627.3946474,
+  "status": "FAILED",
+  "current_agent": "System",
+  "handoff_history": [
+    {
+      "timestamp": "19:30:29",
+      "from": "OrchestratorAgent",
+      "to": "RepoSearcherAgent",
+      "reason": "Investigate workspace code structure and AST definitions"
+    },
+    {
+      "timestamp": "19:30:29",
+      "from": "RepoSearcherAgent",
+      "to": "CoderAgent",
+      "reason": "Synthesize code fixes and modifications based on repository context"
+    }
+  ],
+  "logs": [
+    {
+      "timestamp": "19:30:27",
+      "agent": "System",
+      "message": "Starting multi-agent engineering workflow...",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "19:30:27",
+      "agent": "OrchestratorAgent",
+      "message": "Analyzing task requirements: '\"Build a fast 2D Space Jet Defender game in static/game_space.html with HTML5 Canvas, enemy fleet waves, laser firing, and health HUD.\"'",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "OrchestratorAgent",
+      "message": "Plan generated with 5 steps.",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "RepoSearcherAgent",
+      "message": "Scanning workspace directory and parsing AST...",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "RepoSearcherAgent",
+      "message": "Found 29 source files. Analyzed AST for 5 modules.",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "CoderAgent",
+      "message": "Synthesizing code solution for task...",
+      "level": "INFO"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "CoderAgent",
+      "message": "Model 'llama-3.1-8b-instant' rate/api note: Error code: 413 - {'error': {'message': 'Request too large for model `llama-3.1-8b-instant` in organization `org_01kw1mvn0tf28sg4nfa2bezajb` service tier `on_demand` on tokens per minute (TPM): Limit 6000, Requested 7375, please reduce your message size and try again. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "CoderAgent",
+      "message": "Model 'llama3-8b-8192' rate/api note: Error code: 400 - {'error': {'message': 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "CoderAgent",
+      "message": "Model 'mixtral-8x7b-32768' rate/api note: Error code: 400 - {'error': {'message': 'The model `mixtral-8x7b-32768` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.', 'type': 'invalid_request_error', 'code': 'model_decommissioned'}}",
+      "level": "WARNING"
+    },
+    {
+      "timestamp": "19:30:29",
+      "agent": "System",
+      "message": "Pipeline error: All LLM models in fallback chain failed.",
+      "level": "ERROR"
+    }
+  ],
+  "task_plan": {
+    "task_id": "task-1b0e99b7",
+    "original_prompt": "Build a fast 2D Space Jet Defender game in static/game_space.html with HTML5 Canvas, enemy fleet waves, laser firing, and health HUD.",
+    "summary": "High-level plan for building a 2D Space Jet Defender game",
+    "steps": [
+      {
+        "step_number": 1,
+        "assigned_agent": "RepoSearcherAgent",
+        "action_summary": "Search for existing game templates and parse AST for HTML5 Canvas usage",
+        "target_files": [
+          "static/game_space.html"
+        ]
+      },
+      {
+        "step_number": 2,
+        "assigned_agent": "CoderAgent",
+        "action_summary": "Synthesize code modifications for enemy fleet waves and laser firing functionality",
+        "target_files": [
+          "static/game_space.js"
+        ]
+      },
+      {
+        "step_number": 3,
+        "assigned_agent": "ReviewerAgent",
+        "action_summary": "Audit security and quality of synthesized code modifications",
+        "target_files": [
+          "static/game_space.js"
+        ]
+      },
+      {
+        "step_number": 4,
+        "assigned_agent": "TesterAgent",
+        "action_summary": "Write and execute pytest tests for game functionality and edge cases",
+        "target_files": [
+          "tests/test_game_space.py"
+        ]
+      },
+      {
+        "step_number": 5,
+        "assigned_agent": "DocWriterAgent",
+        "action_summary": "Generate documentation and PR summary for the game development process",
+        "target_files": [
+          "README.md"
+        ]
+      }
+    ],
+    "estimated_complexity": "High"
+  },
+  "code_diff": null,
+  "review_result": null,
+  "test_result": null,
+  "pr_result": null
+}

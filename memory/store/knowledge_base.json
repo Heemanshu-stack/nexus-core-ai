@@ -1,0 +1,250 @@
+{
+  "version": "1.0",
+  "notes": [
+    {
+      "tag": "RELEASE",
+      "content": "Task task-fb687e45: Create a new file called utils/text_parser.py that contains a function count_words(text: str) -> int. This function should return the number of words in a given string. Also, generate a pytest unit test for it. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-1c62241f: Create a new file called utils/calculator.py with a function add_numbers(a: int, b: int) -> int and a pytest test for it. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-1c113585: Build a calculator module with addition, subtraction, multiplication, division, and power functions in utils/calculator.py | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-8c8d3d3e: Build a modern Weather Forecast dashboard in static/weather.html with a sleek dark glassmorphism design, search bar for cities, 5-day weather forecast cards, temperature indicators, and weather condition badges. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-f1ed3e01: Build a real-time Markdown Editor web page in static/editor.html with split-screen side-by-side live markdown preview, live character/word counters, theme toggle, and copy-to-clipboard functionality. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-653ac381: Build a modern scientific calculator web page in static/scientific_calculator.html featuring a dark glassmorphism theme, smooth animations, standard arithmetic operations (+, -, *, /), trigonometric functions (sin, cos, tan), logarithmic functions (log, ln), exponentiation (x^y, x^2), square root, memory keys (MC, MR, M+, M-), and keyboard input support. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-a634241a: Build  web page have a good morning message which emoji and images | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-4ff03f64: Build a comprehensive, production-grade AI Creative Studio dashboard in static/ai_studio.html. Include:\n1. UI/UX: Dark glassmorphism theme using HSL color tokens, vibrant indigo/cyan glowing accents, Google Inter typography, floating sidebar navigation, and subtle micro-animations.\n2. Core Features:\n   - Text Prompt Workspace with model selector dropdown (GPT-4, Claude 3, Llama 3) and temperature slider.\n   - Live AI Output Console with instant markdown rendering, code syntax highlighting, copy-to-clipboard, and word/token counter metrics.\n   - Media Assets Gallery with filter tabs (All, Images, Audio, Code) and lightbox preview modal.\n   - System Status Footer displaying API latency (ms), active GPU memory usage %, and token usage gauge.\n3. State & Persistence: Full JavaScript state management storing generated history items in LocalStorage. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-e5b11392: Create an enhanced Cyber-Grid Snake game in static/game_snake.html. Include:\n1. Mechanics: Classic snake movement with smooth grid controls, food items, glowing special power-ups (Speed Boost, Double Points, Shield), and progressive difficulty acceleration.\n2. UI & Design: Cyberpunk neon dark theme, glowing snake trails, live Score & Multiplier HUD, high score leaderboard saved locally, and sound effect toggles.\n3. Controls: Keyboard Arrow keys & touch gesture buttons for mobile play. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-e5b11392: Create an enhanced Cyber-Grid Snake game in static/game_snake.html. Include:\n1. Mechanics: Classic snake movement with smooth grid controls, food items, glowing special power-ups (Speed Boost, Double Points, Shield), and progressive difficulty acceleration.\n2. UI & Design: Cyberpunk neon dark theme, glowing snake trails, live Score & Multiplier HUD, high score leaderboard saved locally, and sound effect toggles.\n3. Controls: Keyboard Arrow keys & touch gesture buttons for mobile play. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-8623277a: Build a retro 8-bit Arcade Snake game in static/game_snake.html with pixel art canvas styling, retro sound effects, score multiplier, levels that speed up as length grows, and local storage high-score leaderboard. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-16eee31b: Build a retro 1942 WWII Dogfight Aircraft game in static/game_dogfight.html using HTML5 Canvas. Include player fighter plane movement, shooting enemy bomber formations, dodging anti-aircraft flak, collecting health/ammo drops, live score counter, and sound synthesis effects. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-e9174dd2: Create a Space Defender Arcade Game in static/game_space.html. Feature a player starship with plasma cannons, wave-based alien fleet invasions, destructive asteroid hazards, energy shield gauge, boss fight mechanics, and touch controls for mobile play. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-fde9ec3b: Build a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-98b61562: Build a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-c1b61875: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-eb02dd85: Build a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-eb02dd85: Build a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-1b0d9cc7: Build a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-cb3314ca: Build a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-e8c78bf7: Build a 2D Cyber-Highway Racing game using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-cb6d8d51: Build a 2D Cyber-Highway Racing game using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-96bcd0ea: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-364cc781: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-fb6f4814: \"Build a fast 2D Space Jet Defender game in static/game_space.html with HTML5 Canvas, enemy fleet waves, laser firing, and health HUD.\" | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-1bf23284: Build an arcade Snake game in static/game_snake.html with glowing neon graphicsBuild a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-54606bf1: Build a 2D Cyber-Highway Racing game in static/game_racing.html using HTML5 Canvas. Include a scrolling neon highway, player sports car, traffic obstacles to dodge, speed boosters, distance HUD, engine sound synth, and WASD/Arrow key controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-254c8aa1: Create an action Snake game in static/game_snake.html with HTML5 Canvas featuring different colored apples (Red = Normal, Golden = +50 pts, Blue = Slow motion, Purple = Ghost mode), particle explosions on eat, custom glassmorphism HUD, and mobile touch buttons. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-af10f43a: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-83da8c82: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-ad8037fc: Build a modern Scientific Calculator web page in static/scientific_calculator.html featuring a dark glassmorphism theme, smooth button animations, standard arithmetic (+, -, *, /), trigonometric functions (sin, cos, tan), logarithmic operations (log, ln), exponents (x^y, x^2), square root, calculation history tape, and full keyboard input support. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-df9e84bc: Build a modern Scientific Calculator web page in static/scientific_calculator.html featuring a dark glassmorphism theme, smooth button animations, standard arithmetic (+, -, *, /), trigonometric functions (sin, cos, tan), logarithmic operations (log, ln), exponents (x^y, x^2), square root, calculation history tape, and full keyboard input support. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-1fb5d40c: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-85d74984: Build an arcade 2D Cyber-Grid Snake game in static/game_snake.html using HTML5 Canvas and JavaScript. Include a dark glassmorphism UI, glowing emerald snake trails, collectible power-ups (Speed Boost, 2x Score, Shield), live Score and High Score HUD saved in localStorage, Web Audio API sound effects, Start and Game Over overlay screens, and responsive touch D-Pad controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-a6bda143: Build an arcade 2D Cyber-Grid Snake game in static/game_snake.html using HTML5 Canvas and JavaScript. Include a dark glassmorphism UI, glowing emerald snake trails, collectible power-ups (Speed Boost, 2x Score, Shield), live Score and High Score HUD saved in localStorage, Web Audio API sound effects, Start and Game Over overlay screens, and responsive touch D-Pad controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-8880b85c: Build an arcade 2D Cyber-Grid Snake game in static/game_snake.html using HTML5 Canvas and JavaScript. Include a dark glassmorphism UI, glowing emerald snake trails, collectible power-ups (Speed Boost, 2x Score, Shield), live Score and High Score HUD saved in localStorage, Web Audio API sound effects, Start and Game Over overlay screens, and responsive touch D-Pad controls. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-0dad71a4: Build a modern Scientific Calculator web page in static/scientific_calculator.html featuring a dark glassmorphism theme, smooth button animations, standard arithmetic (+, -, *, /), trigonometric functions (sin, cos, tan), logarithmic operations (log, ln), exponents (x^y, x^2), square root, calculation history tape, and full keyboard input support. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-04155c80: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-e199469a: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-e199469a: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-06da6d82: Create a modern, responsive Scientific Calculator frontend in `static/scientific_calculator.html` with support for basic operations, square root, power, trigonometric functions (sin, cos, tan), clear, and history tracking. Connect it to the backend API endpoint `/api/calculate`. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-8b84fe43: Add advanced math operations `square_root(a)`, `factorial(n)`, `percentage(a, b)`, and `modulus(a, b)` to `utils/calculator.py`. Update `/api/calculate` in `main.py` to handle these operations with proper error validation and add unit tests in `tests/test_calculator.py`. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-5e13a29d: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "TRAINING",
+      "content": "Trained PyTorch model on CPU (CPU) with accuracy 75.0%"
+    },
+    {
+      "tag": "TRAINING",
+      "content": "Trained Scikit-Learn model on CPU (None) with accuracy 90.0%"
+    },
+    {
+      "tag": "TRAINING",
+      "content": "Trained PyTorch model on CPU (CPU) with accuracy 72.0%"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-6c6dd4a1: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-e6efdaa1: build a calculator with interactive ui | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-be6f5062: Build a modern Weather Forecast dashboard in static/weather.html | PR: None"
+    },
+    {
+      "tag": "TRAINING",
+      "content": "Trained Scikit-Learn model on CPU (None) with accuracy 90.0%"
+    },
+    {
+      "tag": "TRAINING",
+      "content": "Trained Scikit-Learn model on CPU (None) with accuracy 90.0%"
+    },
+    {
+      "tag": "TRAINING",
+      "content": "Trained PyTorch model on CPU (CPU) with accuracy 70.0%"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-43b0b38a: Build an arcade Snake game in static/game_snake.html with glowing neon glassmorphism graphics, Web Audio API sound synthesis, live score and high score tracker saved in localStorage, keyboard WASD/Arrow controls, responsive mobile D-Pad, and Start/Game Over overlay screens. | PR: None"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task test-agent-task-5: Write release documentation | PR: https://github.com/local-workspace/capstone/pull/42"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task test-agent-task-5: Write release documentation | PR: https://github.com/local-workspace/capstone/pull/42"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-65e2be0a: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: https://github.com/local-workspace/capstone/pull/42"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-c2983d65: create a basic calculator with good ui | PR: https://github.com/local-workspace/capstone/pull/42"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-1b87c9ed: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: https://github.com/local-workspace/capstone/pull/42"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-c67151a3: Build an calculator in static/sci_calci.html with glowing neon graphics | PR: https://github.com/local-workspace/capstone/pull/42"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-5f288994: Build an arcade Snake game in static/game_snake.html with glowing neon graphics | PR: https://github.com/local-workspace/capstone/pull/42"
+    },
+    {
+      "tag": "RELEASE",
+      "content": "Task task-8a3133a8: Build an calculatot in static/sci_calci.html with glowing neon graphics | PR: https://github.com/local-workspace/capstone/pull/42"
+    }
+  ],
+  "sessions": []
+}

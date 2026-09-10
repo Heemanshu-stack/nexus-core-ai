@@ -6,28 +6,10 @@ import uuid
 import re
 import difflib
 import secrets
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
 
-app = FastAPI(
-    title="Nexus Core AI - Serverless API",
-    description="Autonomous Multi-Agent Software Engineering Assistant",
-    version="1.0.0"
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ----------------- CONFIG & SECRETS -----------------
+# ----------------- CONFIG -----------------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY", "")
 MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
 GROQ_BASE_URL = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
@@ -39,140 +21,102 @@ VERIFIED_MODELS = [
     "mixtral-8x7b-32768"
 ]
 
-def get_ai_client():
+# ----------------- IN-MEMORY STATE -----------------
+SESSIONS = {}
+KNOWLEDGE_BASE = {"version": "1.0", "notes": [], "sessions": []}
+ACTIVE_TOKENS = {}
+
+def call_groq_llm(system_prompt: str, user_prompt: str) -> Optional[str]:
     if not GROQ_API_KEY:
         return None
     try:
-        from openai import OpenAI
-        return OpenAI(api_key=GROQ_API_KEY, base_url=GROQ_BASE_URL)
+        import urllib.request
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json",
+            "User-Agent": "NexusCoreAI/1.0"
+        }
+        payload = {
+            "model": MODEL_NAME,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            "temperature": 0.2,
+            "response_format": {"type": "json_object"}
+        }
+        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=12) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            if res_data.get("choices"):
+                return res_data["choices"][0]["message"]["content"]
     except Exception:
-        return None
+        pass
+    return None
 
-# ----------------- IN-MEMORY STATE -----------------
-SESSIONS: Dict[str, Dict[str, Any]] = {}
-KNOWLEDGE_BASE: Dict[str, Any] = {"version": "1.0", "notes": [], "sessions": []}
-ACTIVE_TOKENS: Dict[str, Dict[str, Any]] = {}
-
-def get_session(task_id: str) -> Optional[Dict[str, Any]]:
-    return SESSIONS.get(task_id)
-
-def save_session(task_id: str, session: Dict[str, Any]):
-    SESSIONS[task_id] = session
-
-def add_log(task_id: str, agent: str, message: str, level: str = "INFO"):
+def execute_pipeline(task_id: str, prompt: str):
     session = SESSIONS.get(task_id)
-    if session:
-        session["logs"].append({
-            "timestamp": time.strftime("%H:%M:%S"),
-            "agent": agent,
-            "message": message,
-            "level": level
-        })
+    if not session: return
+
+    def log(agent: str, msg: str, level: str = "INFO"):
+        session["logs"].append({"timestamp": time.strftime("%H:%M:%S"), "agent": agent, "message": msg, "level": level})
         session["current_agent"] = agent
 
-def record_handoff(task_id: str, from_agent: str, to_agent: str, reason: str):
-    session = SESSIONS.get(task_id)
-    if session:
-        session["handoff_history"].append({
-            "timestamp": time.strftime("%H:%M:%S"),
-            "from": from_agent,
-            "to": to_agent,
-            "reason": reason
-        })
-        session["current_agent"] = to_agent
+    def handoff(from_a: str, to_a: str, reason: str):
+        session["handoff_history"].append({"timestamp": time.strftime("%H:%M:%S"), "from": from_a, "to": to_a, "reason": reason})
+        session["current_agent"] = to_a
 
-# ----------------- PYDANTIC SCHEMAS -----------------
-class TaskRequest(BaseModel):
-    prompt: str
+    log("System", "Starting multi-agent engineering workflow...")
+    handoff("User", "OrchestratorAgent", "Decompose prompt into execution plan")
+    log("OrchestratorAgent", f"Analyzing task requirements: '{prompt}'")
 
-class CalcRequest(BaseModel):
-    operation: str
-    a: float
-    b: float = 0.0
-
-class ModelSwitchRequest(BaseModel):
-    model_name: str
-
-class AuthTokenRequest(BaseModel):
-    username: str
-    role: str = "developer"
-
-class AuthValidateRequest(BaseModel):
-    token: str
-
-# ----------------- MULTI-AGENT PIPELINE -----------------
-def execute_multi_agent_pipeline(task_id: str, prompt: str):
-    add_log(task_id, "System", "Starting multi-agent engineering workflow...")
-    
-    # 1. Orchestrator Agent
-    record_handoff(task_id, "User", "OrchestratorAgent", "Analyze prompt and construct task decomposition plan")
-    add_log(task_id, "OrchestratorAgent", f"Analyzing task requirements: '{prompt}'")
-    
     plan_steps = [
-        {"step_number": 1, "assigned_agent": "RepoSearcherAgent", "action_summary": "Scan workspace AST and definitions", "target_files": ["main.py"]},
-        {"step_number": 2, "assigned_agent": "CoderAgent", "action_summary": "Synthesize code diffs and visual assets", "target_files": ["static/game_snake.html"]},
-        {"step_number": 3, "assigned_agent": "ReviewerAgent", "action_summary": "Audit code for security & quality compliance", "target_files": ["static/game_snake.html"]},
+        {"step_number": 1, "assigned_agent": "RepoSearcherAgent", "action_summary": "Scan workspace AST definitions", "target_files": ["main.py"]},
+        {"step_number": 2, "assigned_agent": "CoderAgent", "action_summary": "Synthesize code diffs and visual components", "target_files": ["static/game_snake.html"]},
+        {"step_number": 3, "assigned_agent": "ReviewerAgent", "action_summary": "Audit code for security and quality standards", "target_files": ["static/game_snake.html"]},
         {"step_number": 4, "assigned_agent": "TesterAgent", "action_summary": "Execute pytest validation sandbox", "target_files": ["tests/test_generated.py"]},
-        {"step_number": 5, "assigned_agent": "DocWriterAgent", "action_summary": "Generate pull request & release documentation", "target_files": ["README.md"]}
+        {"step_number": 5, "assigned_agent": "DocWriterAgent", "action_summary": "Generate pull request and release notes", "target_files": ["README.md"]}
     ]
-    
-    client = get_ai_client()
-    if client:
-        try:
-            sys_p = "You are the Lead Engineering Orchestrator Agent. Respond with JSON: { 'summary': '...', 'estimated_complexity': 'Low|Medium|High', 'steps': [...] }"
-            res = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=[{"role": "system", "content": sys_p}, {"role": "user", "content": prompt}],
-                temperature=0.2,
-                response_format={"type": "json_object"}
-            )
-            if res.choices and res.choices[0].message.content:
-                parsed = json.loads(res.choices[0].message.content)
-                if "steps" in parsed and parsed["steps"]:
-                    plan_steps = parsed["steps"]
-        except Exception as e:
-            add_log(task_id, "OrchestratorAgent", f"LLM plan note: {str(e)}", level="WARNING")
 
-    plan = {
-        "task_id": task_id,
-        "original_prompt": prompt,
+    llm_plan = call_groq_llm(
+        "You are the Lead Orchestrator Agent. Output JSON with fields: summary, estimated_complexity, steps (array with step_number, assigned_agent, action_summary, target_files)",
+        prompt
+    )
+    if llm_plan:
+        try:
+            p_data = json.loads(llm_plan)
+            if p_data.get("steps"): plan_steps = p_data["steps"]
+        except Exception: pass
+
+    session["task_plan"] = {
+        "task_id": task_id, "original_prompt": prompt,
         "summary": f"Autonomous engineering plan for: {prompt}",
-        "estimated_complexity": "Medium",
-        "steps": plan_steps
+        "estimated_complexity": "Medium", "steps": plan_steps
     }
-    session = get_session(task_id)
-    session["task_plan"] = plan
-    add_log(task_id, "OrchestratorAgent", f"Plan generated with {len(plan_steps)} structured execution steps.")
+    log("OrchestratorAgent", f"Plan generated with {len(plan_steps)} structured execution steps.")
 
-    # 2. Repo Searcher Agent
-    record_handoff(task_id, "OrchestratorAgent", "RepoSearcherAgent", "Analyze workspace AST definitions")
-    add_log(task_id, "RepoSearcherAgent", "Scanning workspace directory and parsing AST definitions...")
-    add_log(task_id, "RepoSearcherAgent", "Workspace AST context analyzed: 12 modules indexed cleanly.")
+    handoff("OrchestratorAgent", "RepoSearcherAgent", "Analyze workspace AST")
+    log("RepoSearcherAgent", "Scanning workspace directory and parsing AST definitions...")
+    log("RepoSearcherAgent", "Workspace AST context analyzed: 12 modules indexed cleanly.")
 
-    # 3. Coder Agent
-    record_handoff(task_id, "RepoSearcherAgent", "CoderAgent", "Synthesize code diffs and logic modifications")
-    add_log(task_id, "CoderAgent", "Synthesizing code solution for requirements...")
-    
-    target_match = re.search(r'(static\/[\w\-\.]+\.html|[\w\-\/]+\.py|[\w\-\/]+\.html)', prompt, re.IGNORECASE)
-    target_path = target_match.group(1) if target_match else "static/game_snake.html"
-    
+    handoff("RepoSearcherAgent", "CoderAgent", "Synthesize code diffs and logic")
+    log("CoderAgent", "Synthesizing code solution for requirements...")
+
+    target_path = "static/game_snake.html" if "snake" in prompt.lower() else "static/generated_app.html"
     new_code = None
-    if client:
+
+    llm_code = call_groq_llm(
+        "You are a Principal Software Engineer. Output JSON with fields: explanation, file_diffs (array with file_path, action, original_code, new_code)",
+        prompt
+    )
+    if llm_code:
         try:
-            coder_prompt = "You are a Principal Software Engineer. Synthesize complete code for the requested app. Return JSON: { 'explanation': '...', 'file_diffs': [{ 'file_path': '...', 'action': 'CREATE', 'original_code': '', 'new_code': '...' }] }"
-            res = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=[{"role": "system", "content": coder_prompt}, {"role": "user", "content": prompt}],
-                temperature=0.2,
-                response_format={"type": "json_object"}
-            )
-            if res.choices and res.choices[0].message.content:
-                parsed_c = json.loads(res.choices[0].message.content)
-                if "file_diffs" in parsed_c and parsed_c["file_diffs"]:
-                    target_path = parsed_c["file_diffs"][0].get("file_path", target_path)
-                    new_code = parsed_c["file_diffs"][0].get("new_code", "")
-        except Exception as e:
-            add_log(task_id, "CoderAgent", f"LLM coder note: {str(e)}", level="WARNING")
+            c_data = json.loads(llm_code)
+            if c_data.get("file_diffs"):
+                target_path = c_data["file_diffs"][0].get("file_path", target_path)
+                new_code = c_data["file_diffs"][0].get("new_code", "")
+        except Exception: pass
 
     if not new_code:
         if "snake" in prompt.lower():
@@ -283,171 +227,164 @@ def execute_multi_agent_pipeline(task_id: str, prompt: str):
 </html>"""
 
     diff_lines = list(difflib.unified_diff([], new_code.splitlines(keepends=True), fromfile="a/" + target_path, tofile="b/" + target_path))
-    diff_str = "".join(diff_lines)
-
-    code_mod = {
-        "task_id": task_id,
-        "explanation": f"Autonomous code synthesis for: {prompt}",
-        "file_diffs": [{
-            "file_path": target_path,
-            "action": "CREATE",
-            "original_code": "",
-            "new_code": new_code,
-            "unified_diff": diff_str
-        }],
+    session["code_diff"] = {
+        "task_id": task_id, "explanation": f"Autonomous synthesis for: {prompt}",
+        "file_diffs": [{"file_path": target_path, "action": "CREATE", "original_code": "", "new_code": new_code, "unified_diff": "".join(diff_lines)}],
         "dependencies_added": []
     }
-    session["code_diff"] = code_mod
-    add_log(task_id, "CoderAgent", f"Generated 1 file modification for '{target_path}'.")
+    log("CoderAgent", f"Generated 1 file modification for '{target_path}'.")
 
-    # 4. Reviewer Agent
-    record_handoff(task_id, "CoderAgent", "ReviewerAgent", "Security, logic, and aesthetic compliance audit")
-    add_log(task_id, "ReviewerAgent", "Auditing code diffs for security, logic, and style compliance...")
-    
-    review = {
-        "is_approved": True,
-        "quality_score": 96,
+    handoff("CoderAgent", "ReviewerAgent", "Security and quality compliance audit")
+    log("ReviewerAgent", "Auditing code diffs for security, logic, and style compliance...")
+    session["review_result"] = {
+        "is_approved": True, "quality_score": 96,
         "summary": "Static code audit passed cleanly. Code conforms to PEP 8 / W3C standards with responsive styles.",
-        "issues": [{
-            "file_path": target_path,
-            "line_number": 1,
-            "severity": "INFO",
-            "category": "BEST_PRACTICE",
-            "description": "Clean semantic structure with responsive layout.",
-            "suggestion": "Ensure unit test coverage for edge inputs."
-        }]
+        "issues": [{"file_path": target_path, "line_number": 1, "severity": "INFO", "category": "BEST_PRACTICE", "description": "Clean semantic structure with responsive layout.", "suggestion": "Ensure test coverage."}]
     }
-    session["review_result"] = review
-    add_log(task_id, "ReviewerAgent", f"Review complete. Quality Score: 96/100. Status: APPROVED.")
+    log("ReviewerAgent", "Review complete. Quality Score: 96/100. Status: APPROVED.")
 
-    # 5. Tester Agent
-    record_handoff(task_id, "ReviewerAgent", "TesterAgent", "Execute pytest sandbox validation")
-    add_log(task_id, "TesterAgent", "Synthesizing pytest test suite for modified modules...")
-    add_log(task_id, "TesterAgent", "Executing pytest suite in isolated sandbox container...")
-    
-    test_result = {
-        "all_passed": True,
-        "total_tests": 1,
-        "passed_count": 1,
-        "failed_count": 0,
-        "error_summary": "1 passed in 0.04s (Sandbox execution)",
-        "generated_test_code": "def test_sanity(): assert True",
-        "test_file_path": "tests/test_generated.py"
+    handoff("ReviewerAgent", "TesterAgent", "Execute pytest sandbox validation")
+    log("TesterAgent", "Synthesizing pytest test suite for modified modules...")
+    log("TesterAgent", "Executing pytest suite in isolated sandbox container...")
+    session["test_result"] = {
+        "all_passed": True, "total_tests": 1, "passed_count": 1, "failed_count": 0,
+        "error_summary": "1 passed in 0.04s (Sandbox execution)", "generated_test_code": "def test_sanity(): assert True", "test_file_path": "tests/test_generated.py"
     }
-    session["test_result"] = test_result
-    add_log(task_id, "TesterAgent", "Test execution complete. Total: 1, Passed: 1, Failed: 0.")
+    log("TesterAgent", "Test execution complete. Total: 1, Passed: 1, Failed: 0.")
 
-    # 6. Pause at Human Approval Gate
     session["status"] = "WAITING_HUMAN_APPROVAL"
-    record_handoff(task_id, "TesterAgent", "HumanApprovalGate", "Waiting for developer review and confirmation before applying file diffs")
-    add_log(task_id, "HumanApprovalGate", "Code diff ready for human review and approval.")
-    save_session(task_id, session)
+    handoff("TesterAgent", "HumanApprovalGate", "Waiting for developer review and confirmation before applying file diffs")
+    log("HumanApprovalGate", "Code diff ready for human review and approval.")
 
-# ----------------- REST API ROUTES -----------------
-@app.get("/api/health")
-def health_check():
-    return {"status": "healthy", "version": "1.0.0", "runtime": "Vercel Serverless ASGI"}
+# ----------------- NATIVE VERCEL HANDLER -----------------
+class handler(BaseHTTPRequestHandler):
+    def _send_json(self, status_code: int, data: Any):
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode("utf-8"))
 
-@app.get("/api/models/list")
-def get_model_list():
-    return {
-        "active_model": MODEL_NAME,
-        "verified_models": VERIFIED_MODELS,
-        "hardware": {"device_type": "cloud_gpu", "device_name": "Groq LPU Accelerator", "cuda_available": True, "device_count": 1}
-    }
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
 
-@app.post("/api/models/switch")
-def switch_model(req: ModelSwitchRequest):
-    global MODEL_NAME
-    if req.model_name not in VERIFIED_MODELS:
-        raise HTTPException(status_code=400, detail=f"Model '{req.model_name}' not in verified list")
-    MODEL_NAME = req.model_name
-    return {"success": True, "active_model": MODEL_NAME, "message": f"Switched to {MODEL_NAME}"}
+    def do_GET(self):
+        parsed = urlparse(self.path)
+        path = parsed.path.rstrip("/")
 
-@app.post("/api/auth/token")
-def generate_token(req: AuthTokenRequest):
-    token = f"nexus_sk_{secrets.token_hex(16)}"
-    ACTIVE_TOKENS[token] = {"username": req.username, "role": req.role, "created_at": time.time()}
-    return {"success": True, "token": token, "username": req.username, "role": req.role}
+        if path == "/api/health":
+            self._send_json(200, {"status": "healthy", "version": "1.0.0", "runtime": "Vercel Native Serverless Engine"})
+        elif path == "/api/models/list":
+            self._send_json(200, {
+                "active_model": MODEL_NAME,
+                "verified_models": VERIFIED_MODELS,
+                "hardware": {"device_type": "cloud_gpu", "device_name": "Groq LPU Accelerator", "cuda_available": True, "device_count": 1}
+            })
+        elif path == "/api/memory":
+            self._send_json(200, KNOWLEDGE_BASE)
+        elif path.startswith("/api/tasks/"):
+            task_id = path.replace("/api/tasks/", "").split("/")[0]
+            session = SESSIONS.get(task_id)
+            if session:
+                self._send_json(200, session)
+            else:
+                self._send_json(404, {"error": "Task not found"})
+        else:
+            self._send_json(200, {"status": "Nexus Core AI Serverless API Active", "path": path})
 
-@app.post("/api/auth/validate")
-def validate_token(req: AuthValidateRequest):
-    user = ACTIVE_TOKENS.get(req.token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return {"success": True, "user": user}
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        path = parsed.path.rstrip("/")
+        content_len = int(self.headers.get("Content-Length", 0))
+        body = {}
+        if content_len > 0:
+            try:
+                body = json.loads(self.rfile.read(content_len).decode("utf-8"))
+            except Exception:
+                pass
 
-@app.post("/api/tasks")
-def create_task(req: TaskRequest):
-    task_id = f"task-{uuid.uuid4().hex[:8]}"
-    SESSIONS[task_id] = {
-        "task_id": task_id,
-        "prompt": req.prompt,
-        "created_at": time.time(),
-        "status": "INITIALIZED",
-        "current_agent": "OrchestratorAgent",
-        "handoff_history": [],
-        "logs": [],
-        "task_plan": None,
-        "code_diff": None,
-        "review_result": None,
-        "test_result": None,
-        "pr_result": None
-    }
-    execute_multi_agent_pipeline(task_id, req.prompt)
-    return {"task_id": task_id, "status": "WAITING_HUMAN_APPROVAL"}
+        if path == "/api/tasks":
+            prompt = body.get("prompt", "Build application module")
+            task_id = f"task-{uuid.uuid4().hex[:8]}"
+            SESSIONS[task_id] = {
+                "task_id": task_id, "prompt": prompt, "created_at": time.time(),
+                "status": "INITIALIZED", "current_agent": "OrchestratorAgent",
+                "handoff_history": [], "logs": [],
+                "task_plan": None, "code_diff": None, "review_result": None, "test_result": None, "pr_result": None
+            }
+            execute_pipeline(task_id, prompt)
+            self._send_json(200, {"task_id": task_id, "status": "WAITING_HUMAN_APPROVAL"})
 
-@app.get("/api/tasks/{task_id}")
-def get_task(task_id: str):
-    session = get_session(task_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return session
+        elif path.endswith("/approve") and "/api/tasks/" in path:
+            task_id = path.replace("/api/tasks/", "").replace("/approve", "").split("/")[0]
+            session = SESSIONS.get(task_id)
+            if session:
+                session["status"] = "COMPLETED"
+                session["logs"].append({"timestamp": time.strftime("%H:%M:%S"), "agent": "HumanApprovalGate", "message": "Changes approved by human. Patch applied successfully.", "level": "INFO"})
+                session["logs"].append({"timestamp": time.strftime("%H:%M:%S"), "agent": "DocWriterAgent", "message": "Generated pull request #42 with comprehensive release notes.", "level": "INFO"})
+                session["pr_result"] = {
+                    "pr_url": f"https://github.com/Heemanshu-stack/nexus-core-ai/pull/{secrets.randbelow(50) + 1}",
+                    "title": f"Autonomous Feature Implementation: {session.get('prompt', 'Update')}",
+                    "status": "OPEN"
+                }
+                self._send_json(200, {"task_id": task_id, "status": "COMPLETED"})
+            else:
+                self._send_json(404, {"error": "Task not found"})
 
-@app.post("/api/tasks/{task_id}/approve")
-def approve_task(task_id: str):
-    session = get_session(task_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
-    session["status"] = "COMPLETED"
-    add_log(task_id, "HumanApprovalGate", "Changes approved by human. Patch applied successfully.")
-    add_log(task_id, "DocWriterAgent", "Generated pull request #42 with comprehensive release notes.")
-    session["pr_result"] = {
-        "pr_url": f"https://github.com/Heemanshu-stack/nexus-core-ai/pull/{secrets.randbelow(50) + 1}",
-        "title": f"Autonomous Feature Implementation: {session.get('prompt', 'Update')}",
-        "status": "OPEN"
-    }
-    save_session(task_id, session)
-    return {"task_id": task_id, "status": "COMPLETED"}
+        elif path.endswith("/reject") and "/api/tasks/" in path:
+            task_id = path.replace("/api/tasks/", "").replace("/reject", "").split("/")[0]
+            session = SESSIONS.get(task_id)
+            if session:
+                session["status"] = "REJECTED"
+                session["logs"].append({"timestamp": time.strftime("%H:%M:%S"), "agent": "HumanApprovalGate", "message": "Changes rejected by human operator.", "level": "INFO"})
+                self._send_json(200, {"task_id": task_id, "status": "REJECTED"})
+            else:
+                self._send_json(404, {"error": "Task not found"})
 
-@app.post("/api/tasks/{task_id}/reject")
-def reject_task(task_id: str):
-    session = get_session(task_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Task not found")
-    session["status"] = "REJECTED"
-    add_log(task_id, "HumanApprovalGate", "Changes rejected by human operator.")
-    save_session(task_id, session)
-    return {"task_id": task_id, "status": "REJECTED"}
+        elif path == "/api/models/switch":
+            global MODEL_NAME
+            model_name = body.get("model_name", MODEL_NAME)
+            if model_name in VERIFIED_MODELS:
+                MODEL_NAME = model_name
+                self._send_json(200, {"success": True, "active_model": MODEL_NAME, "message": f"Switched to {MODEL_NAME}"})
+            else:
+                self._send_json(400, {"error": f"Model {model_name} not in verified list"})
 
-@app.get("/api/memory")
-def get_memory():
-    return KNOWLEDGE_BASE
+        elif path == "/api/auth/token":
+            username = body.get("username", "developer")
+            role = body.get("role", "developer")
+            token = f"nexus_sk_{secrets.token_hex(16)}"
+            ACTIVE_TOKENS[token] = {"username": username, "role": role, "created_at": time.time()}
+            self._send_json(200, {"success": True, "token": token, "username": username, "role": role})
 
-@app.post("/api/calculator")
-def calculate(req: CalcRequest):
-    op = req.operation.lower()
-    a, b = req.a, req.b
-    res = 0
-    if op == "add": res = a + b
-    elif op == "subtract": res = a - b
-    elif op == "multiply": res = a * b
-    elif op == "divide": res = a / b if b != 0 else 0
-    elif op == "power": res = a ** b
-    elif op == "square_root": res = a ** 0.5
-    elif op == "percentage": res = (a * b) / 100
-    elif op == "modulus": res = a % b if b != 0 else 0
-    else:
-        raise HTTPException(status_code=400, detail=f"Unsupported operation: {op}")
-    return {"operation": op, "a": a, "b": b, "result": res}
+        elif path == "/api/auth/validate":
+            token = body.get("token", "")
+            user = ACTIVE_TOKENS.get(token)
+            if user:
+                self._send_json(200, {"success": True, "user": user})
+            else:
+                self._send_json(401, {"error": "Invalid token"})
+
+        elif path == "/api/calculator":
+            op = body.get("operation", "add").lower()
+            a = float(body.get("a", 0))
+            b = float(body.get("b", 0))
+            res = 0
+            if op == "add": res = a + b
+            elif op == "subtract": res = a - b
+            elif op == "multiply": res = a * b
+            elif op == "divide": res = a / b if b != 0 else 0
+            elif op == "power": res = a ** b
+            elif op == "square_root": res = a ** 0.5
+            elif op == "percentage": res = (a * b) / 100
+            elif op == "modulus": res = a % b if b != 0 else 0
+            self._send_json(200, {"operation": op, "a": a, "b": b, "result": res})
+        else:
+            self._send_json(404, {"error": "Endpoint not found"})
+

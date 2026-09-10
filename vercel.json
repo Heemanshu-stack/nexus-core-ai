@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/snake",
+      "destination": "/game_snake.html"
+    },
+    {
+      "source": "/calculator",
+      "destination": "/calculator.html"
+    },
+    {
+      "source": "/api/(.*)",
       "destination": "/api/index.py"
     }
   ]

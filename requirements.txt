@@ -3,4 +3,3 @@ pydantic>=2.6.0
 python-dotenv>=1.0.0
 openai>=1.50.0
 requests>=2.31.0
-mangum>=0.17.0

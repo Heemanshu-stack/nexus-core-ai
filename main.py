@@ -296,3 +296,29 @@ def execute_calculator(req: CalcRequest):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
+
+
+class DeleteResultRequest(BaseModel):
+    file_path: str
+
+@app.delete("/api/tasks/{task_id}/delete-result")
+def delete_result(task_id: str, req: DeleteResultRequest):
+    """Deletes the generated output file when user discards a result."""
+    try:
+        # Strip leading 'static/' prefix if present
+        rel = req.file_path.replace("static/", "").lstrip("/")
+        target = (STATIC_DIR / rel).resolve()
+        static_resolved = STATIC_DIR.resolve()
+        if static_resolved in target.parents and target.exists() and target.is_file():
+            target.unlink()
+            session = session_mgr.get_session(task_id)
+            if session:
+                session_mgr.add_log(task_id, "FileEditorTool", f"Deleted result: {req.file_path}")
+            return {"deleted": True, "file_path": req.file_path}
+        return {"deleted": False, "reason": "File not found or outside static/"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/calculate")
+def calculate_alias(req: CalcRequest):
+    return execute_calculator(req)

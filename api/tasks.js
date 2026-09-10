@@ -42,7 +42,12 @@ module.exports = async (req, res) => {
     const prompt = body.prompt || "Build application module";
     const newId = `task-${Math.random().toString(16).substring(2, 10)}`;
 
-    const targetPath = prompt.toLowerCase().includes("snake") ? "static/game_snake.html" : "static/generated_app.html";
+    let targetPath = "static/generated_app.html";
+    if (prompt.toLowerCase().includes("ship") || prompt.toLowerCase().includes("fight") || prompt.toLowerCase().includes("battle") || prompt.toLowerCase().includes("space")) {
+      targetPath = "static/game_ships.html";
+    } else if (prompt.toLowerCase().includes("snake")) {
+      targetPath = "static/game_snake.html";
+    }
     const newCode = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -134,3 +139,4 @@ module.exports = async (req, res) => {
     return res.status(200).json({ task_id: newId, status: "WAITING_HUMAN_APPROVAL" });
   }
 };
+

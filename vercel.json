@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/ships", "destination": "/game_ships.html" },
     { "source": "/snake", "destination": "/game_snake.html" },
     { "source": "/calculator", "destination": "/calculator.html" },
     { "source": "/api/health", "destination": "/api/health.js" },

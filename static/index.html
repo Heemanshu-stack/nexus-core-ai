@@ -185,7 +185,7 @@
                         <div class="placeholder-text">Unified code diffs and semantic patches will appear here.</div>
                     </div>
 
-                    <div class="approval-actions" id="approval-actions" style="display: none;">
+                    <div class="approval-actions" id="approval-actions" style="display: none;">`r`n                        <button class="btn btn-primary btn-lg" id="btn-preview-game" onclick="openGamePreviewModal()" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 0 25px rgba(236,72,153,0.4);">`r`n                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`r`n                            ?? Play / Preview Live App`r`n                        </button>
                         <button class="btn btn-success btn-lg" id="btn-approve-diff">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             Authorize Patch
@@ -266,5 +266,25 @@
     </div>
 
     <script src="/static/app.js"></script>
+    <!-- Live Game & App Runner Sandbox Modal -->
+    <div class="modal-backdrop" id="game-preview-modal" style="display: none;">
+        <div class="modal-box glass-modal" style="max-width: 700px; width: 95%;">
+            <div class="modal-header">
+                <h2 id="preview-modal-title">?? Live Synthesized Application Preview</h2>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a id="preview-open-tab-btn" href="/ships" target="_blank" class="btn btn-glass" style="font-size: 0.85rem; padding: 6px 12px; text-decoration: none;">
+                        Open in New Tab ?
+                    </a>
+                    <button class="btn-close" onclick="closeGamePreviewModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow: hidden; border-radius: 0 0 20px 20px;">
+                <iframe id="preview-iframe" src="/ships" style="width: 100%; height: 530px; border: none; background: #030712; display: block;"></iframe>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
+

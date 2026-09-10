@@ -1,3 +1,23 @@
+
+let currentAppPreviewUrl = "/ships";
+
+function openGamePreviewModal(url) {
+    const targetUrl = url || currentAppPreviewUrl || "/ships";
+    const modal = document.getElementById("game-preview-modal");
+    const iframe = document.getElementById("preview-iframe");
+    const openBtn = document.getElementById("preview-open-tab-btn");
+    
+    if (iframe) iframe.src = targetUrl;
+    if (openBtn) openBtn.href = targetUrl;
+    if (modal) modal.style.display = "flex";
+}
+
+function closeGamePreviewModal() {
+    const modal = document.getElementById("game-preview-modal");
+    const iframe = document.getElementById("preview-iframe");
+    if (iframe) iframe.src = "about:blank";
+    if (modal) modal.style.display = "none";
+}
 let currentTaskId = null;
 let pollingInterval = null;
 let lastLogCount = 0;
@@ -160,7 +180,14 @@ async function pollTaskStatus() {
 
         const btnSubmit = document.getElementById("btn-submit-task");
 
-        if (session.status === "WAITING_HUMAN_APPROVAL") {
+        if (session.code_diff && session.code_diff.file_diffs && session.code_diff.file_diffs.length > 0) {
+        const fp = session.code_diff.file_diffs[0].file_path || "";
+        if (fp.includes("ship")) currentAppPreviewUrl = "/ships";
+        else if (fp.includes("snake")) currentAppPreviewUrl = "/snake";
+        else if (fp.includes("calculator")) currentAppPreviewUrl = "/calculator";
+        else currentAppPreviewUrl = "/" + fp.replace(/^static\//, "");
+    }
+    if (session.status === "WAITING_HUMAN_APPROVAL") {
             setSystemStatus("Action Required 🛑", "status-waiting");
             if (btnSubmit) {
                 btnSubmit.disabled = false;
@@ -313,7 +340,14 @@ function updateUIWithSession(session) {
         const actionsRow = document.getElementById("approval-actions");
         
         if (badge) {
-            if (session.status === "WAITING_HUMAN_APPROVAL") {
+            if (session.code_diff && session.code_diff.file_diffs && session.code_diff.file_diffs.length > 0) {
+        const fp = session.code_diff.file_diffs[0].file_path || "";
+        if (fp.includes("ship")) currentAppPreviewUrl = "/ships";
+        else if (fp.includes("snake")) currentAppPreviewUrl = "/snake";
+        else if (fp.includes("calculator")) currentAppPreviewUrl = "/calculator";
+        else currentAppPreviewUrl = "/" + fp.replace(/^static\//, "");
+    }
+    if (session.status === "WAITING_HUMAN_APPROVAL") {
                 badge.innerText = "Authorization Required";
                 badge.className = "badge badge-warning";
                 if (actionsRow) actionsRow.style.display = "flex";
@@ -718,3 +752,4 @@ function runAutonomousSwarmSimulation(prompt) {
         }
     }, 800);
 }
+

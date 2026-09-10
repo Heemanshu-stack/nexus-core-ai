@@ -226,3 +226,4 @@ class ModelTrainerService:
             "f1_score": round(f1, 4),
             "training_time_sec": elapsed_time
         }
+

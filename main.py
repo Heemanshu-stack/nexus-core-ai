@@ -4,7 +4,7 @@ import uvicorn
 from pathlib import Path
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel
 
 from config import HOST, PORT, WORKSPACE_DIR, MODEL_NAME, VERIFIED_MODELS, get_hardware_device_info
@@ -34,10 +34,18 @@ editor_tool = FileEditorTool(root_dir=WORKSPACE_DIR)
 memory_tool = MemoryTool()
 auth_mgr = AuthManager()
 
-# Mount Static Files for Dashboard UI
+# Static Directory Resolution
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-STATIC_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+try:
+    STATIC_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
+
+if STATIC_DIR.exists():
+    try:
+        app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+    except Exception:
+        pass
 
 class TaskRequest(BaseModel):
     prompt: str
@@ -63,7 +71,6 @@ class AuthTokenRequest(BaseModel):
 
 class AuthValidateRequest(BaseModel):
     token: str
-
 
 
 def run_agent_pipeline(task_id: str, prompt: str):
@@ -111,180 +118,65 @@ def run_agent_pipeline(task_id: str, prompt: str):
             session["status"] = "FAILED"
             session_mgr.save_session(task_id, session)
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def serve_dashboard():
     index_file = STATIC_DIR / "index.html"
     if index_file.exists():
-        return FileResponse(index_file)
-    return JSONResponse({"message": "AI Software Engineering Assistant API is active."})
+        with open(index_file, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Nexus Core AI Executive Engineering Platform</h1>")
 
-@app.get("/calculator")
+@app.get("/calculator", response_class=HTMLResponse)
 def serve_calculator():
     calc_file = STATIC_DIR / "calculator.html"
     if not calc_file.exists():
         calc_file = STATIC_DIR / "scientific_calculator.html"
     if calc_file.exists():
-        return FileResponse(calc_file)
-    return JSONResponse({"message": "Calculator web page not found."}, status_code=404)
+        with open(calc_file, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Calculator web page not found.</h1>", status_code=404)
 
-@app.get("/snake")
+@app.get("/snake", response_class=HTMLResponse)
 def serve_snake():
     snake_file = STATIC_DIR / "game_snake.html"
     if snake_file.exists():
-        return FileResponse(snake_file)
-    return JSONResponse({"message": "Snake game web page not found."}, status_code=404)
+        with open(snake_file, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Snake game web page not found.</h1>", status_code=404)
+
+@app.get("/static/{file_path:path}")
+def serve_static_file(file_path: str):
+    target = STATIC_DIR / file_path
+    if target.exists() and target.is_file():
+        mime = "text/plain"
+        if file_path.endswith(".css"):
+            mime = "text/css"
+        elif file_path.endswith(".js"):
+            mime = "application/javascript"
+        elif file_path.endswith(".html"):
+            mime = "text/html"
+        elif file_path.endswith(".png"):
+            mime = "image/png"
+        elif file_path.endswith(".jpg") or file_path.endswith(".jpeg"):
+            mime = "image/jpeg"
+        elif file_path.endswith(".svg"):
+            mime = "image/svg+xml"
+        
+        with open(target, "rb") as f:
+            return Response(content=f.read(), media_type=mime)
+    raise HTTPException(status_code=404, detail="File not found")
 
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy", "version": "1.0.0"}
 
-@app.post("/api/calculate")
-def perform_calculation(req: CalcRequest):
-    op = req.operation.lower()
-    try:
-        if op == "add":
-            res = add(req.a, req.b)
-        elif op == "subtract":
-            res = subtract(req.a, req.b)
-        elif op == "multiply":
-            res = multiply(req.a, req.b)
-        elif op == "divide":
-            res = divide(req.a, req.b)
-        elif op == "power":
-            res = power(req.a, req.b)
-        elif op in ("square_root", "sqrt"):
-            res = square_root(req.a)
-        elif op == "factorial":
-            res = factorial(int(req.a))
-        elif op == "percentage":
-            res = percentage(req.a, req.b)
-        elif op == "modulus":
-            res = modulus(int(req.a), int(req.b))
-        else:
-            raise HTTPException(status_code=400, detail=f"Unsupported operation '{op}'")
-        return {"operation": op, "a": req.a, "b": req.b, "result": res}
-    except ZeroDivisionError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/tasks")
-def create_task(req: TaskRequest, background_tasks: BackgroundTasks):
-    if not req.prompt.strip():
-        raise HTTPException(status_code=400, detail="Task prompt cannot be empty.")
-    
-    task_id = f"task-{uuid.uuid4().hex[:8]}"
-    session_mgr.create_session(task_id, req.prompt)
-    
-    # Run agent pipeline asynchronously in background task
-    background_tasks.add_task(run_agent_pipeline, task_id, req.prompt)
-    
-    return {"task_id": task_id, "status": "PIPELINE_STARTED"}
-
-@app.get("/api/tasks/{task_id}")
-def get_task_status(task_id: str):
-    session = session_mgr.get_session(task_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Task session not found.")
-    return session
-
-@app.post("/api/tasks/{task_id}/approve")
-def approve_task(task_id: str):
-    session = session_mgr.get_session(task_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Task session not found.")
-    
-    if session.get("status") != "WAITING_HUMAN_APPROVAL":
-        raise HTTPException(status_code=400, detail=f"Task is in status '{session.get('status')}', not WAITING_HUMAN_APPROVAL.")
-
-    # 1. Apply file diffs to disk
-    code_diff = session.get("code_diff")
-    if code_diff and "file_diffs" in code_diff:
-        for fd in code_diff["file_diffs"]:
-            file_p = Path(fd["file_path"])
-            if not file_p.is_absolute():
-                file_p = WORKSPACE_DIR / file_p
-            editor_tool.write_file(str(file_p), fd["new_code"])
-            session_mgr.add_log(task_id, "FileEditorTool", f"Applied file patch to '{fd['file_path']}'")
-
-    # 2. Trigger Documentation & Release Agent
-    from schemas.code_diff import CodeModification
-    from schemas.review_result import ReviewResult
-    from schemas.test_result import TestExecutionResult
-
-    doc_writer = DocWriterAgent(session_mgr)
-    pr_res = doc_writer.finalize_release(
-        task_id,
-        session["prompt"],
-        CodeModification(**session["code_diff"]),
-        ReviewResult(**session["review_result"]),
-        TestExecutionResult(**session["test_result"])
-    )
-
-    session["status"] = "COMPLETED"
-    session_mgr.save_session(task_id, session)
-
-    return {"status": "APPROVED_AND_RELEASED", "pr_result": pr_res}
-
-@app.post("/api/tasks/{task_id}/reject")
-def reject_task(task_id: str):
-    session = session_mgr.get_session(task_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Task session not found.")
-
-    session["status"] = "REJECTED"
-    session_mgr.add_log(task_id, "HumanApprovalGate", "User rejected proposed code diffs.", level="WARNING")
-    session_mgr.save_session(task_id, session)
-
-    return {"status": "REJECTED"}
-
-@app.post("/api/auth/token")
-def create_auth_token(req: AuthTokenRequest):
-    try:
-        token = auth_mgr.generate_token(req.username, req.role)
-        return {"status": "SUCCESS", "token": token, "username": req.username, "role": req.role}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-@app.post("/api/auth/validate")
-def validate_auth_token(req: AuthValidateRequest):
-    data = auth_mgr.validate_token(req.token)
-    if not data:
-        raise HTTPException(status_code=401, detail="Invalid or expired token.")
-    return {"status": "VALID", "token_data": data}
-
-@app.get("/api/memory")
-def get_memory_store():
-    return memory_tool.load_knowledge()
-
-@app.get("/api/stats")
-def get_stats():
-    kb = memory_tool.load_knowledge()
-    notes_count = len(kb.get("notes", []))
-    sessions_dir = session_mgr.storage_dir
-    session_files = list(sessions_dir.glob("*.json")) if sessions_dir.exists() else []
-    active_tasks = 0
-    for sfile in session_files:
-        sess = session_mgr.get_session(sfile.stem)
-        if sess and sess.get("status") in ("INITIALIZED", "RUNNING", "WAITING_HUMAN_APPROVAL"):
-            active_tasks += 1
-            
-    return JSONResponse(
-        content={
-            "active_tasks": active_tasks,
-            "memory_notes_count": notes_count,
-            "server_status": "online"
-        },
-        media_type="application/json"
-    )
-
 @app.get("/api/models/list")
-def list_models_and_hardware():
+def get_model_list():
     import config
     hardware = get_hardware_device_info()
     return {
-        "current_model": config.MODEL_NAME,
-        "available_models": VERIFIED_MODELS,
+        "active_model": config.MODEL_NAME,
+        "verified_models": VERIFIED_MODELS,
         "hardware": hardware
     }
 
@@ -292,42 +184,139 @@ def list_models_and_hardware():
 def switch_model(req: ModelSwitchRequest):
     import config
     if req.model_name not in VERIFIED_MODELS:
-        raise HTTPException(status_code=400, detail=f"Model '{req.model_name}' is not in verified list: {VERIFIED_MODELS}")
+        raise HTTPException(status_code=400, detail=f"Model '{req.model_name}' not in verified list: {VERIFIED_MODELS}")
+    
     config.MODEL_NAME = req.model_name
-    os.environ["MODEL_NAME"] = req.model_name
-    return {"status": "SUCCESS", "active_model": config.MODEL_NAME}
+    return {
+        "success": True,
+        "active_model": config.MODEL_NAME,
+        "message": f"Successfully switched to {req.model_name}"
+    }
 
 @app.post("/api/models/train")
-def train_model(req: ModelTrainRequest):
+def train_custom_model(req: ModelTrainRequest, background_tasks: BackgroundTasks):
     trainer = ModelTrainerService()
     try:
-        if req.framework.lower() == "pytorch":
-            res = trainer.train_pytorch_model(
-                epochs=req.epochs,
-                batch_size=req.batch_size,
-                learning_rate=req.learning_rate,
-                num_samples=req.num_samples
-            )
-        else:
-            res = trainer.train_sklearn_model(
-                num_samples=req.num_samples
-            )
-        
-        acc_val = res.get('best_val_accuracy', res.get('test_accuracy'))
-        memory_tool.add_note(
-            tag="TRAINING",
-            note=f"Trained {res.get('framework')} model on {res.get('device_used')} ({res.get('device_name')}) with accuracy {acc_val}%"
+        metrics = trainer.train_pytorch_model(
+            task_type="classification",
+            epochs=req.epochs,
+            batch_size=req.batch_size,
+            learning_rate=req.learning_rate,
+            num_samples=req.num_samples
         )
-        return res
+        return {
+            "success": True,
+            "framework": "PyTorch (GPU/CPU Acceleration)",
+            "metrics": metrics
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Training error: {str(e)}")
+
+@app.post("/api/auth/token")
+def generate_auth_token(req: AuthTokenRequest):
+    token = auth_mgr.generate_token(username=req.username, role=req.role)
+    return {
+        "success": True,
+        "token": token,
+        "username": req.username,
+        "role": req.role
+    }
+
+@app.post("/api/auth/validate")
+def validate_auth_token(req: AuthValidateRequest):
+    user_info = auth_mgr.validate_token(req.token)
+    if not user_info:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return {
+        "success": True,
+        "user": user_info
+    }
+
+@app.post("/api/tasks")
+def create_task(req: TaskRequest, background_tasks: BackgroundTasks):
+    task_id = f"task-{uuid.uuid4().hex[:8]}"
+    session_mgr.create_session(task_id, req.prompt)
+    background_tasks.add_task(run_agent_pipeline, task_id, req.prompt)
+    return {"task_id": task_id, "status": "QUEUED"}
+
+@app.get("/api/tasks/{task_id}")
+def get_task_status(task_id: str):
+    session = session_mgr.get_session(task_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return session
+
+@app.post("/api/tasks/{task_id}/approve")
+def approve_task(task_id: str, background_tasks: BackgroundTasks):
+    session = session_mgr.get_session(task_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    if session.get("status") != "WAITING_HUMAN_APPROVAL":
+        raise HTTPException(status_code=400, detail="Task is not awaiting human approval")
+
+    session["status"] = "APPROVED"
+    session_mgr.add_log(task_id, "HumanApprovalGate", "Changes approved by human. Proceeding with patch application...")
+    session_mgr.save_session(task_id, session)
+
+    def finish_pipeline():
+        try:
+            code_mod = session.get("code_diff")
+            if code_mod and "file_path" in code_mod and "new_content" in code_mod:
+                editor_tool.apply_patch(code_mod["file_path"], code_mod["new_content"])
+                session_mgr.add_log(task_id, "FileEditorTool", f"Patched file {code_mod['file_path']} successfully.")
+
+            doc_writer = DocWriterAgent(session_mgr)
+            doc_writer.create_pull_request(task_id, code_mod)
+
+            session = session_mgr.get_session(task_id)
+            if session:
+                session["status"] = "COMPLETED"
+                session_mgr.save_session(task_id, session)
+        except Exception as e:
+            session_mgr.add_log(task_id, "System", f"Post-approval error: {str(e)}", level="ERROR")
+            session = session_mgr.get_session(task_id)
+            if session:
+                session["status"] = "FAILED"
+                session_mgr.save_session(task_id, session)
+
+    background_tasks.add_task(finish_pipeline)
+    return {"task_id": task_id, "status": "APPROVED"}
+
+@app.post("/api/tasks/{task_id}/reject")
+def reject_task(task_id: str):
+    session = session_mgr.get_session(task_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    session["status"] = "REJECTED"
+    session_mgr.add_log(task_id, "HumanApprovalGate", "Changes rejected by human operator.")
+    session_mgr.save_session(task_id, session)
+    return {"task_id": task_id, "status": "REJECTED"}
+
+@app.get("/api/memory")
+def get_memory_state():
+    return memory_tool.load_knowledge()
+
+@app.post("/api/calculator")
+def execute_calculator(req: CalcRequest):
+    op = req.operation.lower()
+    try:
+        if op == "add": res = add(req.a, req.b)
+        elif op == "subtract": res = subtract(req.a, req.b)
+        elif op == "multiply": res = multiply(req.a, req.b)
+        elif op == "divide": res = divide(req.a, req.b)
+        elif op == "power": res = power(req.a, req.b)
+        elif op == "square_root": res = square_root(req.a)
+        elif op == "factorial": res = factorial(int(req.a))
+        elif op == "percentage": res = percentage(req.a, req.b)
+        elif op == "modulus": res = modulus(req.a, req.b)
+        else:
+            raise HTTPException(status_code=400, detail=f"Unsupported operation: {op}")
+        
+        return {"operation": op, "a": req.a, "b": req.b, "result": res}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
-    should_reload = os.getenv("UVICORN_RELOAD", "false").lower() in ("true", "1")
-    uvicorn.run(
-        "main:app",
-        host=HOST,
-        port=PORT,
-        reload=should_reload,
-        reload_excludes=["memory/*", "memory/sessions/*", "memory/store/*", "tests/*", ".pytest_cache/*", "*.json", "*.log"] if should_reload else None
-    )
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)

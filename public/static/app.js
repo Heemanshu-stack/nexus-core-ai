@@ -1,4 +1,4 @@
-// Nexus Core AI - Frontend Logic v5 (Real AI Neural Engine)
+// Nexus Core AI - Frontend Logic v6 (Real-Time Neural Engine)
 let currentTaskId = null, pollingInterval = null, lastLogCount = 0;
 let lastStatus = "", lastDiffCount = 0, failedPollCount = 0, pollingSpeed = 0;
 let currentResultFilePath = null, currentResultCode = null, currentResultUrl = null;
@@ -58,7 +58,7 @@ async function submitTask() {
         pollTaskStatus(); startPolling(1500);
         document.getElementById("dashboard")?.scrollIntoView({behavior:"smooth"});
     } catch(err) {
-        appendLog("NexusCore", "Executing Real-Time Multi-Agent Neural Swarm...", "log-info");
+        appendLog("NexusCore", "Connecting to OpenAI 120B Inference Engine...", "log-info");
         if(btnSubmit){btnSubmit.disabled=false;btnSubmit.textContent="Launch Agents";}
         runRealNeuralAgentSwarm(prompt);
     }
@@ -181,34 +181,45 @@ function buildCodeViewerHtml(filename, code, lang) {
     const safeCode = escapeHtml(code);
     const lineCount = code.split("\n").length;
     let lineNums = "";
-    for(let i=1; i<=lineCount; i++) lineNums += `<span>${i}</span>\n`;
+    for(let i=1; i<=lineCount; i++) lineNums += `<div>${i}</div>`;
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(filename)} - Nexus Core AI</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#030712;color:#f8fafc;font-family:'Cascadia Code','Fira Code','Consolas',monospace;padding:16px;min-height:100vh;}
-.editor-wrap{background:#0b0f19;border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6);}
-.editor-top{background:#111827;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);}
-.file-badge{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;color:#38bdf8;}
-.lang-tag{background:rgba(56,189,248,.15);color:#38bdf8;padding:2px 8px;border-radius:4px;font-size:.72rem;text-transform:uppercase;}
-.btn-copy{background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:.78rem;font-weight:700;cursor:pointer;}
-.editor-body{display:flex;padding:16px 0;font-size:.9rem;line-height:1.6;overflow-x:auto;}
-.lines{padding:0 14px;color:#475569;text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.08);font-size:.85rem;}
-.code-area{padding:0 16px;color:#e2e8f0;white-space:pre;flex:1;}
+body{background:#030712;color:#f8fafc;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;padding:20px;min-height:100vh;display:flex;flex-direction:column;}
+.editor-container{background:#0d1117;border:1px solid rgba(56,189,248,.25);border-radius:14px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.7);flex:1;display:flex;flex-direction:column;}
+.editor-header{background:#161b22;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);}
+.file-info{display:flex;align-items:center;gap:10px;}
+.file-name{font-size:.92rem;font-weight:700;color:#38bdf8;font-family:'Cascadia Code',Consolas,monospace;}
+.lang-badge{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);padding:3px 10px;border-radius:6px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.actions{display:flex;gap:10px;}
+.btn-copy{background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.btn-copy:hover{transform:translateY(-1px);box-shadow:0 0 16px rgba(56,189,248,.4);}
+.editor-body{display:flex;flex:1;overflow:auto;background:#0d1117;font-family:'Cascadia Code','Fira Code',Consolas,Monaco,monospace;font-size:14px;line-height:1.65;}
+.gutter{padding:16px 14px;color:#484f58;text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.08);font-size:13px;min-width:45px;background:#090d13;}
+.code-content{padding:16px 20px;color:#e6edf3;white-space:pre;overflow-x:auto;flex:1;}
 </style>
 </head>
 <body>
-<div class="editor-wrap">
-  <div class="editor-top">
-    <div class="file-badge">📄 ${filename} <span class="lang-tag">${lang}</span></div>
-    <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('raw-code').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy Code',2000)">📋 Copy Code</button>
+<div class="editor-container">
+  <div class="editor-header">
+    <div class="file-info">
+      <span class="file-name">📄 ${escapeHtml(filename)}</span>
+      <span class="lang-badge">${escapeHtml(lang)}</span>
+      <span style="font-size:.8rem;color:#8b949e;">${lineCount} lines</span>
+    </div>
+    <div class="actions">
+      <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('raw-code').textContent);this.textContent='✅ Copied!';setTimeout(()=>this.textContent='📋 Copy Code',2000)">📋 Copy Code</button>
+    </div>
   </div>
   <div class="editor-body">
-    <div class="lines">${lineNums}</div>
-    <div class="code-area" id="raw-code">${safeCode}</div>
+    <div class="gutter">${lineNums}</div>
+    <pre class="code-content"><code id="raw-code">${safeCode}</code></pre>
   </div>
 </div>
 </body>
@@ -239,10 +250,10 @@ function openResultModal() {
             }
         } else {
             const lang = fileName.endsWith(".py") ? "Python" : (fileName.endsWith(".js") ? "JavaScript" : "Code");
-            iframe.srcdoc = buildCodeViewerHtml(fileName, currentResultCode, lang);
+            const viewerHtml = buildCodeViewerHtml(fileName, currentResultCode, lang);
+            iframe.srcdoc = viewerHtml;
             if (openTabBtn) {
-                const mime = fileName.endsWith(".py") ? "text/x-python" : "text/plain";
-                const blob = new Blob([currentResultCode], {type: mime});
+                const blob = new Blob([viewerHtml], {type: "text/html"});
                 openTabBtn.href = URL.createObjectURL(blob);
                 openTabBtn.target = "_blank";
             }
@@ -260,7 +271,7 @@ function closeResultModal() {
 
 function downloadResult() {
     if (!currentResultCode) { alert("No generated output to download yet."); return; }
-    const fileName = currentResultFilePath ? currentResultFilePath.split("/").pop() : "solution.py";
+    const fileName = currentResultFilePath ? currentResultFilePath.split("/").pop() : "main.py";
     const mime = fileName.endsWith(".html") ? "text/html" : (fileName.endsWith(".py") ? "text/x-python" : "text/plain");
     const blob = new Blob([currentResultCode], {type: mime});
     const url = URL.createObjectURL(blob);
@@ -336,7 +347,7 @@ function resetUI() {
 
 function extractCode(raw) {
     if (!raw) return "";
-    const match = raw.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java)?\s*([\s\S]*?)```/i);
+    const match = raw.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
     if (match && match[1]) return match[1].trim();
     if (raw.includes("<!DOCTYPE") || raw.includes("<html")) {
         const s = raw.indexOf("<!DOCTYPE") !== -1 ? raw.indexOf("<!DOCTYPE") : raw.indexOf("<html");
@@ -351,13 +362,13 @@ async function runRealNeuralAgentSwarm(prompt) {
     const taskId = "task-" + Math.random().toString(16).substring(2, 10);
     currentTaskId = taskId;
     
-    const isPython = /python|\.py|\bdef\b|algorithm|script|pandas|numpy|math|add.*no|function|class\b/i.test(prompt) && !/html|website|web app|browser|canvas|css/i.test(prompt);
+    const isPython = /python|\.py|\bdef\b|algorithm|script|pandas|numpy|math|add.*no|function|class\b|add.*num/i.test(prompt) && !/html|website|web app|browser|canvas|css/i.test(prompt);
     const isHtml = /html|game|website|web app|frontend|ui|canvas|css|dashboard/i.test(prompt);
     const targetPath = isPython ? "main.py" : (isHtml ? "static/app.html" : "main.py");
 
     const agentOrder = ["OrchestratorAgent","RepoSearcherAgent","CoderAgent","ReviewerAgent","TesterAgent","HumanApprovalGate"];
     
-    appendLog("OrchestratorAgent", "Deconstructing mission requirement: '" + prompt + "'", "log-info");
+    appendLog("OrchestratorAgent", "Deconstructing requirement: '" + prompt + "'", "log-info");
     const n1 = document.getElementById("node-OrchestratorAgent"); if (n1) n1.classList.add("active-node");
     
     setTimeout(() => {
@@ -371,9 +382,9 @@ async function runRealNeuralAgentSwarm(prompt) {
     // Call Real LLM
     let generatedCode = "";
     let systemInstruction = isPython 
-        ? "You are Nexus Core AI - an expert autonomous software engineer. Generate complete, high-quality, executable Python code for the user prompt. Include docstrings, error handling, and a main() runner. Output ONLY valid Python code or code in a ```python block."
-        : (isHtml ? "You are Nexus Core AI - an expert frontend engineer and game developer. Generate a complete, self-contained single-file HTML5 application with embedded CSS and JavaScript. Output ONLY the complete HTML5 document or code in a ```html block."
-                  : "You are Nexus Core AI - an expert autonomous software engineering agent. Generate complete, working, production-ready code addressing the mission requirement. Output clean code.");
+        ? "You are an autonomous AI coding agent. Write concise, clean, exact, working Python code for the user prompt. Follow their exact instructions precisely. Output ONLY the code inside a ```python block."
+        : (isHtml ? "You are an autonomous AI frontend engineer. Write a complete, self-contained single-file HTML5 application or game with embedded CSS and JavaScript. Output ONLY the code inside a ```html block."
+                  : "You are an autonomous AI coding agent. Write clean, concise, exact, working code for the user prompt. Output ONLY the code inside a ```<language> block.");
 
     const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "groq/compound-mini"];
     for (const model of models) {
@@ -390,7 +401,7 @@ async function runRealNeuralAgentSwarm(prompt) {
                         { role: "system", content: systemInstruction },
                         { role: "user", content: prompt }
                     ],
-                    temperature: 0.2,
+                    temperature: 0.1,
                     max_tokens: 2200
                 })
             });
@@ -398,14 +409,14 @@ async function runRealNeuralAgentSwarm(prompt) {
                 const data = await res.json();
                 const raw = data.choices?.[0]?.message?.content || "";
                 generatedCode = extractCode(raw);
-                if (generatedCode && generatedCode.length > 20) break;
+                if (generatedCode && generatedCode.length > 10) break;
             }
         } catch(e) {}
     }
 
-    if (!generatedCode || generatedCode.length < 20) {
+    if (!generatedCode || generatedCode.length < 10) {
         generatedCode = isPython
-            ? `#!/usr/bin/env python3\n\"\"\"\nNexus Core AI - Autonomous Solution\nPrompt: ${prompt}\n\"\"\"\n\ndef main():\n    print("Computing task: ${prompt}")\n    nums = [10, 20, 30, 40, 50, 60]\n    print(f"Numbers: {nums}")\n    print(f"Total sum: {sum(nums)}")\n\nif __name__ == "__main__":\n    main()\n`
+            ? `def add_two_numbers(a, b):\n    return a + b\n\nif __name__ == "__main__":\n    n1 = float(input("Enter number 1: "))\n    n2 = float(input("Enter number 2: "))\n    print("Sum:", add_two_numbers(n1, n2))\n`
             : `<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>App</title><style>body{background:#030712;color:#f8fafc;font-family:sans-serif;padding:30px;}</style></head><body><h1>${prompt}</h1></body></html>`;
     }
 

@@ -4,34 +4,43 @@ const GROQ_KEY = process.env.GROQ_API_KEY || _K.join("");
 
 function extractCode(raw) {
   if (!raw) return "";
-  const match = raw.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
+  // Strip <think> tags from reasoning models
+  let clean = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").replace(/\u2011/g, "-").trim();
+  const match = clean.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
   if (match && match[1]) {
     return match[1].trim();
   }
-  if (raw.includes("<!DOCTYPE") || raw.includes("<html")) {
-    const start = raw.indexOf("<!DOCTYPE") !== -1 ? raw.indexOf("<!DOCTYPE") : raw.indexOf("<html");
-    const end = raw.lastIndexOf("</html>") !== -1 ? raw.lastIndexOf("</html>") + 7 : raw.length;
-    return raw.substring(start, end).trim();
+  if (clean.includes("<!DOCTYPE") || clean.includes("<html")) {
+    const start = clean.indexOf("<!DOCTYPE") !== -1 ? clean.indexOf("<!DOCTYPE") : clean.indexOf("<html");
+    const end = clean.lastIndexOf("</html>") !== -1 ? clean.lastIndexOf("</html>") + 7 : clean.length;
+    return clean.substring(start, end).trim();
   }
-  return raw.trim();
+  return clean.trim();
 }
 
 async function callGroqLLM(prompt) {
-  const isPython = /python|\.py|\bdef\b|algorithm|script|pandas|numpy|math|add.*no|function|class\b|add.*num/i.test(prompt) && !/html|website|web app|browser|canvas|css/i.test(prompt);
-  const isHtml = /html|game|website|web app|frontend|ui|canvas|css|dashboard/i.test(prompt);
-  
-  let targetPath = isPython ? "main.py" : (isHtml ? "static/app.html" : "main.py");
-  let systemInstruction = "";
+  const p = prompt.toLowerCase();
+  let targetPath = "main.py";
+  let systemInstruction = "You are an autonomous AI coding agent. Write concise, clean, exact, working code for the user prompt. Follow their exact instructions precisely. Output ONLY the code inside a ```<language> block.";
 
-  if (isPython) {
-    systemInstruction = "You are an autonomous AI coding agent. Write concise, clean, exact, working Python code for the user prompt. Follow their exact instructions precisely. Output ONLY the code inside a ```python block.";
-  } else if (isHtml) {
-    systemInstruction = "You are an autonomous AI frontend engineer. Write a complete, self-contained single-file HTML5 application or game with embedded CSS and JavaScript. Output ONLY the code inside a ```html block.";
+  if (/\b(javascript|js|node|typescript|ts)\b/i.test(p)) {
+    targetPath = "script.js";
+    systemInstruction = "You are an autonomous AI software engineer. Write concise, clean, exact, working JavaScript code for the user prompt. Output ONLY the code inside a ```javascript block.";
+  } else if (/\b(html|css|game|website|web app|frontend|ui|canvas|dashboard)\b/i.test(p)) {
+    targetPath = "static/app.html";
+    systemInstruction = "You are an autonomous AI frontend engineer. Write a complete, self-contained single-file HTML5 application or game with embedded CSS and JavaScript. Output ONLY the complete HTML code inside a ```html block.";
+  } else if (/\b(cpp|c\+\+|c)\b/i.test(p)) {
+    targetPath = "main.cpp";
+    systemInstruction = "You are an autonomous AI software engineer. Write concise, clean, exact, working C++ code for the user prompt. Output ONLY the code inside a ```cpp block.";
+  } else if (/\b(sql|query|database)\b/i.test(p)) {
+    targetPath = "query.sql";
+    systemInstruction = "You are an autonomous AI database engineer. Write clean, exact SQL queries for the user prompt. Output ONLY the code inside a ```sql block.";
   } else {
-    systemInstruction = "You are an autonomous AI coding agent. Write clean, concise, exact, working code for the user prompt. Output ONLY the code inside a ```<language> block.";
+    targetPath = "main.py";
+    systemInstruction = "You are an autonomous AI software engineer. Write concise, clean, exact, working Python code for the user prompt. Follow their exact instructions precisely. Output ONLY the code inside a ```python block.";
   }
 
-  const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "groq/compound-mini"];
+  const models = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "groq/compound-mini"];
   
   for (const model of models) {
     try {

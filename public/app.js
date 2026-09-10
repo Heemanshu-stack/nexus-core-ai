@@ -347,14 +347,15 @@ function resetUI() {
 
 function extractCode(raw) {
     if (!raw) return "";
-    const match = raw.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
+    let clean = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").replace(/\u2011/g, "-").trim();
+    const match = clean.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
     if (match && match[1]) return match[1].trim();
-    if (raw.includes("<!DOCTYPE") || raw.includes("<html")) {
-        const s = raw.indexOf("<!DOCTYPE") !== -1 ? raw.indexOf("<!DOCTYPE") : raw.indexOf("<html");
-        const e = raw.lastIndexOf("</html>") !== -1 ? raw.lastIndexOf("</html>") + 7 : raw.length;
-        return raw.substring(s, e).trim();
+    if (clean.includes("<!DOCTYPE") || clean.includes("<html")) {
+        const s = clean.indexOf("<!DOCTYPE") !== -1 ? clean.indexOf("<!DOCTYPE") : clean.indexOf("<html");
+        const e = clean.lastIndexOf("</html>") !== -1 ? clean.lastIndexOf("</html>") + 7 : clean.length;
+        return clean.substring(s, e).trim();
     }
-    return raw.trim();
+    return clean.trim();
 }
 
 // Real Neural Agent Swarm Execution
@@ -386,7 +387,7 @@ async function runRealNeuralAgentSwarm(prompt) {
         : (isHtml ? "You are an autonomous AI frontend engineer. Write a complete, self-contained single-file HTML5 application or game with embedded CSS and JavaScript. Output ONLY the code inside a ```html block."
                   : "You are an autonomous AI coding agent. Write clean, concise, exact, working code for the user prompt. Output ONLY the code inside a ```<language> block.");
 
-    const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "groq/compound-mini"];
+    const models = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "groq/compound-mini"];
     for (const model of models) {
         try {
             const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {

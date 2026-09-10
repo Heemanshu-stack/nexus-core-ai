@@ -1,18 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nexus Core AI - Executive Engineering Platform</title>
+    <meta name="description" content="Nexus Core AI orchestrates a swarm of specialized AI agents to autonomously build, test, and ship your software.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=6">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
     <!-- Header Navigation -->
     <header class="app-header">
         <div class="brand">
-            <div class="brand-logo">⚡</div>
+            <div class="brand-logo">&#x26A1;</div>
             <div class="brand-text">
                 <h1>Nexus Core <span class="text-gradient">AI</span></h1>
             </div>
@@ -21,22 +22,11 @@
             <span class="status-pill status-ready" id="system-status-pill">
                 <span class="status-dot"></span> System Ready
             </span>
-            <button class="btn btn-glass" id="btn-theme-toggle" title="Toggle Light/Dark Theme">
-                <span id="theme-toggle-icon">🌙</span>
+            <button class="btn btn-glass" id="btn-theme-toggle" title="Toggle Theme">
+                <span id="theme-toggle-icon">&#x1F319;</span>
                 <span id="theme-toggle-label">Dark Mode</span>
             </button>
-            <a href="/calculator" target="_blank" class="btn btn-glass" style="text-decoration:none;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="8" y1="18" x2="8.01" y2="18"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                Calculator Page ↗
-            </a>
-            <button class="btn btn-glass" id="btn-open-calc">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                Calculator Tool
-            </button>
-            <button class="btn btn-glass" id="btn-view-memory">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                Memory Store
-            </button>
+            <button class="btn btn-glass" id="btn-view-memory">&#x1F9E0; Memory</button>
         </div>
     </header>
 
@@ -44,15 +34,13 @@
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-content">
-                <div class="hero-badge">✨ Multi-Agent Intelligence V2</div>
+                <div class="hero-badge">&#x2728; Multi-Agent Intelligence V2</div>
                 <h1 class="hero-title">Engineering at the <br>Speed of Thought.</h1>
                 <p class="hero-subtitle">Nexus Core orchestrates a swarm of specialized AI agents to autonomously build, test, and ship your software.</p>
-                
                 <div class="hero-actions">
-                    <a href="#dashboard" class="btn btn-primary btn-lg" onclick="document.getElementById('task-prompt').focus()">
-                        Deploy Agents
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </a>
+                    <button class="btn btn-primary btn-lg" onclick="document.getElementById('task-prompt').focus(); document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});">
+                        Deploy Agents &#x2192;
+                    </button>
                 </div>
             </div>
             <div class="hero-glow"></div>
@@ -62,9 +50,8 @@
         <!-- Main Dashboard Content -->
         <main class="dashboard-grid" id="dashboard">
             
-            <!-- Left Column: Task Input & Visual Handoff Graph -->
+            <!-- Left Column -->
             <section class="left-panel">
-
 
                 <!-- Task Prompt Input Card -->
                 <div class="card prompt-card">
@@ -73,16 +60,16 @@
                         <span class="badge badge-info">Agent Swarm Input</span>
                     </div>
                     <div class="card-body">
-                        <textarea id="task-prompt" class="prompt-input" placeholder="Describe the software module, feature, or game you want to build... (e.g. Build an arcade Snake game in static/game_snake.html with glowing neon graphics)"></textarea>
+                        <textarea id="task-prompt" class="prompt-input" placeholder="Describe the software, game, or feature you want to build... e.g. Build a ships battle game with cannon fire animations"></textarea>
                         <div class="prompt-footer">
                             <div class="sample-prompts">
-                                <span class="sample-label">Samples:</span>
-                                <button class="chip" onclick="setSamplePrompt('Build an arcade Snake game in static/game_snake.html with glowing neon graphics')">🎮 Snake Game</button>
-                                <button class="chip" onclick="setSamplePrompt('Build a modern Weather Forecast dashboard in static/weather.html')">🌤️ Weather App</button>
-                                <button class="chip" onclick="setSamplePrompt('Build a Kanban Task Board in static/kanban.html')">📋 Kanban Board</button>
+                                <span class="sample-label">Quick prompts:</span>
+                                <button class="chip" onclick="setSamplePrompt('Build a Ships Battle game with cannon fire animations')">&#x2693; Ships Battle</button>
+                                <button class="chip" onclick="setSamplePrompt('Build a scientific calculator with dark theme')">&#x1F9EE; Calculator</button>
+                                <button class="chip" onclick="setSamplePrompt('Build a Kanban Task Board with drag and drop')">&#x1F4CB; Kanban</button>
                             </div>
                             <button id="btn-submit-task" class="btn btn-primary">
-                                Launch Execution Pipeline
+                                &#x25B6; Launch Agents
                             </button>
                         </div>
                     </div>
@@ -96,51 +83,33 @@
                     </div>
                     <div class="topology-grid">
                         <div class="agent-node" id="node-OrchestratorAgent">
-                            <div class="node-icon">🧠</div>
-                            <div class="node-info">
-                                <h3>Orchestrator</h3>
-                                <p>Requirements & Planning</p>
-                            </div>
+                            <div class="node-icon">&#x1F9E0;</div>
+                            <div class="node-info"><h3>Orchestrator</h3><p>Requirements &amp; Planning</p></div>
                         </div>
                         <div class="node-connector"></div>
                         <div class="agent-node" id="node-RepoSearcherAgent">
-                            <div class="node-icon">🔍</div>
-                            <div class="node-info">
-                                <h3>Repo Searcher</h3>
-                                <p>Workspace & AST Scan</p>
-                            </div>
+                            <div class="node-icon">&#x1F50D;</div>
+                            <div class="node-info"><h3>Repo Searcher</h3><p>Workspace &amp; AST Scan</p></div>
                         </div>
                         <div class="node-connector"></div>
                         <div class="agent-node" id="node-CoderAgent">
-                            <div class="node-icon">💻</div>
-                            <div class="node-info">
-                                <h3>Coder Agent</h3>
-                                <p>Code Synthesis & Diffs</p>
-                            </div>
+                            <div class="node-icon">&#x1F4BB;</div>
+                            <div class="node-info"><h3>Coder Agent</h3><p>Code Synthesis &amp; Diffs</p></div>
                         </div>
                         <div class="node-connector"></div>
                         <div class="agent-node" id="node-ReviewerAgent">
-                            <div class="node-icon">🛡️</div>
-                            <div class="node-info">
-                                <h3>Reviewer Agent</h3>
-                                <p>Security & Quality Audit</p>
-                            </div>
+                            <div class="node-icon">&#x1F6E1;</div>
+                            <div class="node-info"><h3>Reviewer Agent</h3><p>Security &amp; Quality Audit</p></div>
                         </div>
                         <div class="node-connector"></div>
                         <div class="agent-node" id="node-TesterAgent">
-                            <div class="node-icon">🧪</div>
-                            <div class="node-info">
-                                <h3>Tester Agent</h3>
-                                <p>Pytest Sandbox Suite</p>
-                            </div>
+                            <div class="node-icon">&#x1F9EA;</div>
+                            <div class="node-info"><h3>Tester Agent</h3><p>Pytest Sandbox Suite</p></div>
                         </div>
                         <div class="node-connector"></div>
                         <div class="agent-node" id="node-HumanApprovalGate">
-                            <div class="node-icon">🛑</div>
-                            <div class="node-info">
-                                <h3>Human Gate</h3>
-                                <p>Authorization Checkpoint</p>
-                            </div>
+                            <div class="node-icon">&#x1F6D1;</div>
+                            <div class="node-info"><h3>Human Gate</h3><p>Authorization Checkpoint</p></div>
                         </div>
                     </div>
                 </div>
@@ -156,28 +125,28 @@
                 </div>
             </section>
 
-            <!-- Right Column: Diff Reviewer & Live Terminal Logs -->
+            <!-- Right Column -->
             <section class="right-panel">
                 
                 <!-- Code Diff & Audit Reviewer Card -->
                 <div class="card diff-card">
                     <div class="card-header">
-                        <h2>Unified Diff & Audit Metrics</h2>
+                        <h2>Unified Diff &amp; Audit Metrics</h2>
                         <span class="badge badge-idle" id="approval-status-badge">Idle</span>
                     </div>
                     
                     <div class="metrics-row" id="audit-metrics" style="display: none;">
                         <div class="metric-item">
                             <span class="metric-label">Quality Score</span>
-                            <span class="metric-value text-success" id="metric-quality-score">95/100</span>
+                            <span class="metric-value text-success" id="metric-quality-score">--</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-label">Security Status</span>
-                            <span class="metric-value text-info" id="metric-audit-status">PASSED</span>
+                            <span class="metric-value text-info" id="metric-audit-status">--</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-label">Sandbox Tests</span>
-                            <span class="metric-value text-primary" id="metric-test-status">100% PASSED</span>
+                            <span class="metric-value text-primary" id="metric-test-status">--</span>
                         </div>
                     </div>
 
@@ -185,14 +154,25 @@
                         <div class="placeholder-text">Unified code diffs and semantic patches will appear here.</div>
                     </div>
 
-                    <div class="approval-actions" id="approval-actions" style="display: none;">`r`n                        <button class="btn btn-primary btn-lg" id="btn-preview-game" onclick="openGamePreviewModal()" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 0 25px rgba(236,72,153,0.4);">`r`n                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`r`n                            ?? Play / Preview Live App`r`n                        </button>
+                    <!-- Human Approval Actions -->
+                    <div class="approval-actions" id="approval-actions" style="display: none;">
                         <button class="btn btn-success btn-lg" id="btn-approve-diff">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Authorize Patch
+                            &#x2713; Authorize &amp; Apply Patch
                         </button>
                         <button class="btn btn-danger btn-lg" id="btn-reject-diff">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            Reject
+                            &#x2715; Reject
+                        </button>
+                    </div>
+
+                    <!-- Result Banner (shown after COMPLETED) -->
+                    <div class="result-banner" id="result-banner" style="display: none;">
+                        <div class="result-banner-icon">&#x1F389;</div>
+                        <div class="result-banner-text">
+                            <strong>Task Completed!</strong>
+                            <p>Your application is ready to view.</p>
+                        </div>
+                        <button class="btn btn-result" id="btn-view-result" onclick="openResultModal()">
+                            &#x25B6; View Result
                         </button>
                     </div>
                 </div>
@@ -208,7 +188,6 @@
                         <h2 class="terminal-title">Terminal Output Stream</h2>
                         <span class="term-live-tag">LIVE</span>
                     </div>
-
                     <div id="logs-container" class="logs-console">
                         <div class="log-entry log-info">
                             <span class="log-prefix">[NexusCore]</span> System initialized. Ready for operations.
@@ -224,67 +203,43 @@
     <div class="modal-backdrop" id="memory-modal" style="display: none;">
         <div class="modal-box glass-modal">
             <div class="modal-header">
-                <h2>Nexus Memory Bank</h2>
-                <button class="btn-close" onclick="closeMemoryModal()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <h2>&#x1F9E0; Nexus Memory Bank</h2>
+                <button class="btn-close" onclick="closeMemoryModal()">&#x2715;</button>
             </div>
-            <div class="modal-body" id="memory-modal-body">
-                Loading cognitive vectors...
-            </div>
+            <div class="modal-body" id="memory-modal-body">Loading cognitive vectors...</div>
         </div>
     </div>
 
-    <!-- Interactive Calculator Modal -->
-    <div class="modal-backdrop" id="calc-modal" style="display: none;">
-        <div class="modal-box glass-modal" style="max-width: 440px;">
+    <!-- Result Preview Modal -->
+    <div class="modal-backdrop" id="result-modal" style="display: none;">
+        <div class="modal-box result-modal-box">
             <div class="modal-header">
-                <h2>🧮 Interactive Calculator</h2>
-                <button class="btn-close" onclick="closeCalcModal()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div style="display:flex; flex-direction:column; gap:14px;">
-                    <div style="display:flex; gap:10px;">
-                        <input type="number" id="calc-val-a" placeholder="Number A" class="prompt-input" style="height:42px;">
-                        <input type="number" id="calc-val-b" placeholder="Number B" class="prompt-input" style="height:42px;">
-                    </div>
-                    <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px;">
-                        <button class="btn btn-glass" onclick="runCalc('add')">+</button>
-                        <button class="btn btn-glass" onclick="runCalc('subtract')">-</button>
-                        <button class="btn btn-glass" onclick="runCalc('multiply')">×</button>
-                        <button class="btn btn-glass" onclick="runCalc('divide')">÷</button>
-                        <button class="btn btn-glass" onclick="runCalc('power')">aᵇ</button>
-                    </div>
-                    <div id="calc-result" style="padding:14px; background:rgba(0,0,0,0.4); border:1px solid var(--border-subtle); border-radius:8px; font-weight:600; font-size:1.1rem; text-align:center; color:var(--primary);">
-                        Result: --
-                    </div>
+                <div>
+                    <h2 id="result-modal-title">&#x1F680; Generated Application</h2>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;" id="result-modal-subtitle">Your AI-synthesized output is ready</p>
                 </div>
+                <button class="btn-close" onclick="closeResultModal()">&#x2715;</button>
+            </div>
+
+            <div class="result-iframe-wrap">
+                <iframe id="result-iframe" src="about:blank" style="width: 100%; height: 480px; border: none; border-radius: 12px; background: #030712; display: block;"></iframe>
+            </div>
+
+            <div class="result-actions">
+                <a id="btn-open-new-tab" href="#" target="_blank" class="btn btn-glass" style="text-decoration: none;">
+                    &#x2197; Open in Tab
+                </a>
+                <button class="btn btn-primary" id="btn-download-result" onclick="downloadResult()">
+                    &#x2B07; Download HTML
+                </button>
+                <button class="btn btn-danger" id="btn-delete-result" onclick="deleteResultAndClose()">
+                    &#x1F5D1; Discard
+                </button>
             </div>
         </div>
     </div>
 
     <script src="/static/app.js"></script>
-    <!-- Live Game & App Runner Sandbox Modal -->
-    <div class="modal-backdrop" id="game-preview-modal" style="display: none;">
-        <div class="modal-box glass-modal" style="max-width: 700px; width: 95%;">
-            <div class="modal-header">
-                <h2 id="preview-modal-title">?? Live Synthesized Application Preview</h2>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <a id="preview-open-tab-btn" href="/ships" target="_blank" class="btn btn-glass" style="font-size: 0.85rem; padding: 6px 12px; text-decoration: none;">
-                        Open in New Tab ?
-                    </a>
-                    <button class="btn-close" onclick="closeGamePreviewModal()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
-            </div>
-            <div class="modal-body" style="padding: 0; overflow: hidden; border-radius: 0 0 20px 20px;">
-                <iframe id="preview-iframe" src="/ships" style="width: 100%; height: 530px; border: none; background: #030712; display: block;"></iframe>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
 

@@ -1,13 +1,15 @@
-{
+﻿{
   "rewrites": [
-    { "source": "/ships", "destination": "/game_ships.html" },
-    { "source": "/snake", "destination": "/game_snake.html" },
-    { "source": "/calculator", "destination": "/calculator.html" },
+    { "source": "/", "destination": "/static/index.html" },
+    { "source": "/calculator", "destination": "/static/calculator.html" },
     { "source": "/api/health", "destination": "/api/health.js" },
     { "source": "/api/models/(.*)", "destination": "/api/models.js" },
     { "source": "/api/calculator", "destination": "/api/calculator.js" },
     { "source": "/api/memory", "destination": "/api/memory.js" },
-    { "source": "/api/tasks/(.*)", "destination": "/api/tasks.js" },
+    { "source": "/api/tasks/:id/approve", "destination": "/api/tasks.js" },
+    { "source": "/api/tasks/:id/reject", "destination": "/api/tasks.js" },
+    { "source": "/api/tasks/:id/delete-result", "destination": "/api/tasks.js" },
+    { "source": "/api/tasks/:id", "destination": "/api/tasks.js" },
     { "source": "/api/tasks", "destination": "/api/tasks.js" }
   ]
 }

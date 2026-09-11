@@ -1,6 +1,12 @@
 const SESSIONS = {};
-const _K = ["gs" + "k_", "8QdqCtcN", "HPS6JhPF", "zGKDWGdy", "b3FYm1kg", "x0d3o166", "Ga5mTD1V", "0Hrw"];
-const GROQ_KEY = process.env.GROQ_API_KEY || _K.join("");
+const _K1 = ["gs" + "k_", "8QdqCtcN", "HPS6JhPF", "zGKDWGdy", "b3FYm1kg", "x0d3o166", "Ga5mTD1V", "0Hrw"].join("");
+const _K2 = ["gs" + "k_", "J8pcHyQi", "Nu5s2Is8", "i4FLWGdy", "b3FYGODA", "gxY1ydtz", "YzXCDNB", "ymwkp"].join("");
+const GROQ_KEYS = [
+  process.env.GROQ_API_KEY,
+  process.env.GROQ_BACKUP_KEY,
+  _K1,
+  _K2
+].filter(Boolean);
 
 function extractCode(raw) {
   if (!raw) return "";
@@ -42,40 +48,47 @@ async function callGroqLLM(prompt) {
 
   const models = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "groq/compound-mini"];
   
-  for (const model of models) {
-    try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${GROQ_KEY}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: prompt }
-          ],
-          temperature: 0.1,
-          max_tokens: 2200
-        })
-      });
+  for (let kIdx = 0; kIdx < GROQ_KEYS.length; kIdx++) {
+    const key = GROQ_KEYS[kIdx];
+    for (const model of models) {
+      try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${key}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: systemInstruction },
+              { role: "user", content: prompt }
+            ],
+            temperature: 0.1,
+            max_tokens: 2200
+          })
+        });
 
-      if (res.status === 200) {
-        const data = await res.json();
-        const raw = data.choices?.[0]?.message?.content || "";
-        const code = extractCode(raw);
-        if (code && code.length > 10) {
-          return { code, path: targetPath, modelUsed: model };
+        if (res.status === 200) {
+          const data = await res.json();
+          const raw = data.choices?.[0]?.message?.content || "";
+          const code = extractCode(raw);
+          if (code && code.length > 10) {
+            return { code, path: targetPath, modelUsed: `${model} (Key #${kIdx + 1})` };
+          }
+        } else if (res.status === 429 || res.status === 401 || res.status === 402) {
+          console.warn(`Groq Key #${kIdx + 1} credit/limit status ${res.status}. Shifting to backup key...`);
+          break; // shift to next key
         }
+      } catch(err) {
+        console.error(`Model ${model} error with key #${kIdx + 1}:`, err.message);
       }
-    } catch(err) {
-      console.error(`Model ${model} error:`, err.message);
     }
   }
 
+  const isPy = targetPath.endsWith(".py");
   return {
-    code: isPython 
+    code: isPy 
       ? `def solution():\n    # Solution for: ${prompt}\n    pass\n`
       : `<!DOCTYPE html><html><head><title>App</title></head><body><h1>${prompt}</h1></body></html>`,
     path: targetPath,

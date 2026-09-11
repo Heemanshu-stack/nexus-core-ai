@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+GROQ_BACKUP_KEY = os.getenv("GROQ_BACKUP_KEY", "")
 MODEL_NAME = os.getenv("MODEL_NAME", "openai/gpt-oss-120b")
 GROQ_BASE_URL = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
 HOST = os.getenv("HOST", "127.0.0.1")
@@ -20,9 +21,11 @@ VERIFIED_MODELS = [
 
 WORKSPACE_DIR = BASE_DIR
 
-def get_ai_client() -> OpenAI:
-    """Returns an OpenAI client configured for Groq or standard OpenAI."""
-    api_key = GROQ_API_KEY
+def get_ai_client(use_backup: bool = False) -> OpenAI:
+    """Returns an OpenAI client configured for Groq with automatic key fallback."""
+    api_key = GROQ_BACKUP_KEY if (use_backup and GROQ_BACKUP_KEY) else GROQ_API_KEY
+    if not api_key:
+        api_key = GROQ_BACKUP_KEY or GROQ_API_KEY
     if not api_key:
         raise ValueError("GROQ_API_KEY is not configured in environment!")
     return OpenAI(

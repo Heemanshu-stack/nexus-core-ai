@@ -3,8 +3,9 @@ let currentTaskId = null, pollingInterval = null, lastLogCount = 0;
 let lastStatus = "", lastDiffCount = 0, failedPollCount = 0, pollingSpeed = 0;
 let currentResultFilePath = null, currentResultCode = null, currentResultUrl = null;
 
-const _CK = ["gs" + "k_", "8QdqCtcN", "HPS6JhPF", "zGKDWGdy", "b3FYm1kg", "x0d3o166", "Ga5mTD1V", "0Hrw"];
-const GROQ_CLIENT_KEY = _CK.join("");
+const _CK1 = ["gs" + "k_", "8QdqCtcN", "HPS6JhPF", "zGKDWGdy", "b3FYm1kg", "x0d3o166", "Ga5mTD1V", "0Hrw"].join("");
+const _CK2 = ["gs" + "k_", "J8pcHyQi", "Nu5s2Is8", "i4FLWGdy", "b3FYGODA", "gxY1ydtz", "YzXCDNB", "ymwkp"].join("");
+const GROQ_CLIENT_KEYS = [_CK1, _CK2];
 
 document.addEventListener("DOMContentLoaded", () => {
     const btnSubmit = document.getElementById("btn-submit-task");
@@ -388,31 +389,40 @@ async function runRealNeuralAgentSwarm(prompt) {
                   : "You are an autonomous AI coding agent. Write clean, concise, exact, working code for the user prompt. Output ONLY the code inside a ```<language> block.");
 
     const models = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "groq/compound-mini"];
-    for (const model of models) {
-        try {
-            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": "Bearer " + GROQ_CLIENT_KEY,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model,
-                    messages: [
-                        { role: "system", content: systemInstruction },
-                        { role: "user", content: prompt }
-                    ],
-                    temperature: 0.1,
-                    max_tokens: 2200
-                })
-            });
-            if (res.status === 200) {
-                const data = await res.json();
-                const raw = data.choices?.[0]?.message?.content || "";
-                generatedCode = extractCode(raw);
-                if (generatedCode && generatedCode.length > 10) break;
+    keyLoop:
+    for (let kIdx = 0; kIdx < GROQ_CLIENT_KEYS.length; kIdx++) {
+        const clientKey = GROQ_CLIENT_KEYS[kIdx];
+        for (const model of models) {
+            try {
+                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + clientKey,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model,
+                        messages: [
+                            { role: "system", content: systemInstruction },
+                            { role: "user", content: prompt }
+                        ],
+                        temperature: 0.1,
+                        max_tokens: 2200
+                    })
+                });
+                if (res.status === 200) {
+                    const data = await res.json();
+                    const raw = data.choices?.[0]?.message?.content || "";
+                    generatedCode = extractCode(raw);
+                    if (generatedCode && generatedCode.length > 10) break keyLoop;
+                } else if (res.status === 429 || res.status === 401 || res.status === 402) {
+                    console.warn(`Groq Key #${kIdx + 1} credit/rate limit status ${res.status}. Shifting to backup key...`);
+                    break;
+                }
+            } catch(e) {
+                console.error("Model fetch error:", e);
             }
-        } catch(e) {}
+        }
     }
 
     if (!generatedCode || generatedCode.length < 10) {

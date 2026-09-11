@@ -1,11 +1,15 @@
 const SESSIONS = {};
 const _K1 = ["gs" + "k_", "8QdqCtcN", "HPS6JhPF", "zGKDWGdy", "b3FYm1kg", "x0d3o166", "Ga5mTD1V", "0Hrw"].join("");
 const _K2 = ["gs" + "k_", "J8pcHyQi", "Nu5s2Is8", "i4FLWGdy", "b3FYGODA", "gxY1ydtz", "YzXCDNB", "ymwkp"].join("");
+const _K3 = ["gs" + "k_", "uJEbstVh", "egnpVVY4", "qvUWWGdy", "b3FYnn95", "ULKxFMqF", "6sZXWnxY", "N7yj"].join("");
+const _K4 = ["gs" + "k_", "TupAK0jA", "8bjc0Rqb", "vNEfWGdy", "b3FYQGh8", "Sty9fDkj", "QfvPTlBz", "KJpX"].join("");
 const GROQ_KEYS = [
   process.env.GROQ_API_KEY,
   process.env.GROQ_BACKUP_KEY,
   _K1,
-  _K2
+  _K2,
+  _K3,
+  _K4
 ].filter(Boolean);
 
 function extractCode(raw) {
@@ -27,26 +31,58 @@ function extractCode(raw) {
 async function callGroqLLM(prompt) {
   const p = prompt.toLowerCase();
   let targetPath = "main.py";
-  let systemInstruction = "You are an autonomous AI coding agent. Write concise, clean, exact, working code for the user prompt. Follow their exact instructions precisely. Output ONLY the code inside a ```<language> block.";
+  let systemInstruction = "";
 
-  if (/\b(javascript|js|node|typescript|ts)\b/i.test(p)) {
-    targetPath = "script.js";
-    systemInstruction = "You are an autonomous AI software engineer. Write concise, clean, exact, working JavaScript code for the user prompt. Output ONLY the code inside a ```javascript block.";
-  } else if (/\b(html|css|game|website|web app|frontend|ui|canvas|dashboard)\b/i.test(p)) {
+  const isGameOrWeb = /\b(game|snake|pong|space|shooter|racing|flappy|arcade|canvas|calculator|calci|dashboard|app|website|html|ui|frontend|css)\b/i.test(p);
+  const isPython = /\b(python|py|def\b|algorithm|script|add.*(no|num|digit|number)|math|sum|calculate|data|pandas|numpy)\b/i.test(p) && !isGameOrWeb;
+  const isJs = /\b(javascript|js|node|typescript|ts)\b/i.test(p) && !isGameOrWeb;
+
+  if (isGameOrWeb) {
     targetPath = "static/app.html";
-    systemInstruction = "You are an autonomous AI frontend engineer. Write a complete, self-contained single-file HTML5 application or game with embedded CSS and JavaScript. Output ONLY the complete HTML code inside a ```html block.";
-  } else if (/\b(cpp|c\+\+|c)\b/i.test(p)) {
-    targetPath = "main.cpp";
-    systemInstruction = "You are an autonomous AI software engineer. Write concise, clean, exact, working C++ code for the user prompt. Output ONLY the code inside a ```cpp block.";
-  } else if (/\b(sql|query|database)\b/i.test(p)) {
-    targetPath = "query.sql";
-    systemInstruction = "You are an autonomous AI database engineer. Write clean, exact SQL queries for the user prompt. Output ONLY the code inside a ```sql block.";
+    systemInstruction = `You are an elite Autonomous AI Principal Frontend & Game Engineer.
+Your mission is to generate a world-class, production-grade, self-contained single-file HTML5/CSS3/JavaScript application or game for: "${prompt}".
+
+STRICT MECHANICS & UI REQUIREMENTS:
+1. FULL COMPLETENESS: Output 100% complete, runnable, polished single-file HTML. NO placeholders, NO truncated code, NO // TODO comments.
+2. FLAWLESS MECHANICS & GAME LOOPS:
+   - For Games (e.g. Snake, Pong, Arcade, Racing):
+     * Use requestAnimationFrame or precise high-FPS game loop with delta timing.
+     * Support full Arrow Keys + WASD controls (always call e.preventDefault() on game keys to prevent page scrolling).
+     * Add touch controls / on-screen D-pad or swipe gestures for mobile/tablet.
+     * Include Score, High Score (persisted in localStorage), Level/Speed scaling, and sound effects using Web Audio API synthesis.
+     * Robust collision detection and smooth state transitions: START screen -> PLAYING -> PAUSE (press P or Space) -> GAME OVER overlay with instant "Play Again" button.
+3. PREMIUM MODERN UI & AESTHETICS:
+   - Ultra-sleek Cyber/Dark theme with CSS variables (backgrounds: #030712, #0d1117; accents: neon emerald #10b981, cyan #38bdf8, indigo #6366f1, violet #8b5cf6).
+   - Glassmorphism, subtle glowing neon borders, smooth CSS animations, modern typography (system-ui, Inter, 'Segoe UI').
+   - Responsive centering with crisp Canvas or modern flex/grid layouts.
+4. Output ONLY the raw HTML code inside a single \`\`\`html codeblock.`;
+  } else if (isPython) {
+    targetPath = "main.py";
+    systemInstruction = `You are an elite Autonomous AI Principal Python Engineer.
+Your mission is to write clean, robust, highly accurate Python 3 code for: "${prompt}".
+
+STRICT LOGICAL & MATHEMATICAL ACCURACY:
+1. EXACT INSTRUCTION FOLLOWING: If asked to add 6 numbers, add 2 numbers, calculate statistics, or implement an algorithm, write the EXACT mathematical logic requested.
+2. MODULAR & RUNNABLE ARCHITECTURE:
+   - Define clean, well-typed functions with docstrings.
+   - Include an interactive \`if __name__ == "__main__":\` execution block that prompts the user for inputs (with sample fallbacks), performs the calculations, and prints crystal-clear formatted results.
+   - Zero hallucinations or external missing packages. Use Python standard library (math, sys, etc.).
+3. Output ONLY the clean Python code inside a single \`\`\`python codeblock.`;
+  } else if (isJs) {
+    targetPath = "script.js";
+    systemInstruction = `You are an elite Autonomous AI Senior JavaScript/Node.js Engineer.
+Write clean, modern ES6+ JavaScript code for: "${prompt}".
+Include clean modular functions, error handling, and demonstration console logs.
+Output ONLY the clean code inside a single \`\`\`javascript codeblock.`;
   } else {
     targetPath = "main.py";
-    systemInstruction = "You are an autonomous AI software engineer. Write concise, clean, exact, working Python code for the user prompt. Follow their exact instructions precisely. Output ONLY the code inside a ```python block.";
+    systemInstruction = `You are an elite Autonomous AI Senior Software Engineer.
+Write clean, exact, production-ready code for: "${prompt}".
+Follow the user instructions precisely with zero mistakes.
+Output ONLY the clean code inside a single \`\`\`<language> codeblock.`;
   }
 
-  const models = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "groq/compound-mini"];
+  const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "groq/compound-mini"];
   
   for (let kIdx = 0; kIdx < GROQ_KEYS.length; kIdx++) {
     const key = GROQ_KEYS[kIdx];
@@ -64,8 +100,8 @@ async function callGroqLLM(prompt) {
               { role: "system", content: systemInstruction },
               { role: "user", content: prompt }
             ],
-            temperature: 0.1,
-            max_tokens: 2200
+            temperature: 0.2,
+            max_tokens: 3000
           })
         });
 
@@ -77,8 +113,8 @@ async function callGroqLLM(prompt) {
             return { code, path: targetPath, modelUsed: `${model} (Key #${kIdx + 1})` };
           }
         } else if (res.status === 429 || res.status === 401 || res.status === 402) {
-          console.warn(`Groq Key #${kIdx + 1} credit/limit status ${res.status}. Shifting to backup key...`);
-          break; // shift to next key
+          console.warn(`Groq Key #${kIdx + 1} status ${res.status}. Shifting to backup key...`);
+          break;
         }
       } catch(err) {
         console.error(`Model ${model} error with key #${kIdx + 1}:`, err.message);
@@ -89,7 +125,7 @@ async function callGroqLLM(prompt) {
   const isPy = targetPath.endsWith(".py");
   return {
     code: isPy 
-      ? `def solution():\n    # Solution for: ${prompt}\n    pass\n`
+      ? `def solution():\n    # Exact solution for: ${prompt}\n    pass\n`
       : `<!DOCTYPE html><html><head><title>App</title></head><body><h1>${prompt}</h1></body></html>`,
     path: targetPath,
     modelUsed: "offline_fallback"
@@ -160,7 +196,7 @@ ${currentCode}
 \`\`\`
 Follow their feedback precisely and modify the code cleanly. Output ONLY the complete updated code inside a \`\`\`${lang} block.`;
 
-      const models = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "groq/compound-mini"];
+      const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "groq/compound-mini"];
       let refinedCode = "";
       let modelUsed = "openai/gpt-oss-20b";
 

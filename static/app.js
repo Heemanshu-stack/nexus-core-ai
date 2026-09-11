@@ -185,6 +185,9 @@ function buildCodeViewerHtml(filename, code, lang) {
     const lineCount = code.split("\n").length;
     let lineNums = "";
     for(let i=1; i<=lineCount; i++) lineNums += `<div>${i}</div>`;
+    
+    const isPy = (filename || "").endsWith(".py") || (lang && lang.toLowerCase() === "python");
+    const isJs = (filename || "").endsWith(".js") || (lang && lang.toLowerCase() === "javascript");
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -192,20 +195,29 @@ function buildCodeViewerHtml(filename, code, lang) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${escapeHtml(filename)} - Nexus Core AI</title>
+${isPy ? `
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+` : ''}
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#030712;color:#f8fafc;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;padding:20px;min-height:100vh;display:flex;flex-direction:column;}
-.editor-container{background:#0d1117;border:1px solid rgba(56,189,248,.25);border-radius:14px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,.7);flex:1;display:flex;flex-direction:column;}
-.editor-header{background:#161b22;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);}
-.file-info{display:flex;align-items:center;gap:10px;}
-.file-name{font-size:.92rem;font-weight:700;color:#38bdf8;font-family:'Cascadia Code',Consolas,monospace;}
-.lang-badge{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);padding:3px 10px;border-radius:6px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-.actions{display:flex;gap:10px;}
-.btn-copy{background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;}
-.btn-copy:hover{transform:translateY(-1px);box-shadow:0 0 16px rgba(56,189,248,.4);}
-.editor-body{display:flex;flex:1;overflow:auto;background:#0d1117;font-family:'Cascadia Code','Fira Code',Consolas,Monaco,monospace;font-size:14px;line-height:1.65;}
-.gutter{padding:16px 14px;color:#484f58;text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.08);font-size:13px;min-width:45px;background:#090d13;}
-.code-content{padding:16px 20px;color:#e6edf3;white-space:pre;overflow-x:auto;flex:1;}
+body{background:#030712;color:#f8fafc;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;padding:16px;min-height:100vh;display:flex;flex-direction:column;gap:12px;}
+.editor-container{background:#0d1117;border:1px solid rgba(56,189,248,.25);border-radius:12px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,.6);flex:1;display:flex;flex-direction:column;min-height:220px;}
+.editor-header{background:#161b22;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:8px;}
+.file-info{display:flex;align-items:center;gap:8px;}
+.file-name{font-size:.9rem;font-weight:700;color:#38bdf8;font-family:'Cascadia Code',Consolas,monospace;}
+.lang-badge{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.actions{display:flex;gap:8px;align-items:center;}
+.btn-action{background:rgba(255,255,255,0.08);color:#f8fafc;border:1px solid rgba(255,255,255,0.15);padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.btn-action:hover{background:rgba(255,255,255,0.16);transform:translateY(-1px);}
+.btn-run{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 2px 10px rgba(16,185,129,0.3);}
+.btn-run:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(16,185,129,0.5);}
+.editor-body{display:flex;flex:1;overflow:auto;background:#0d1117;font-family:'Cascadia Code','Fira Code',Consolas,Monaco,monospace;font-size:13.5px;line-height:1.6;max-height:260px;}
+.gutter{padding:14px 12px;color:#484f58;text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.08);font-size:12.5px;min-width:40px;background:#090d13;}
+.code-content{padding:14px 16px;color:#e6edf3;white-space:pre;overflow-x:auto;flex:1;}
+.terminal-section{background:#030712;border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.terminal-header{display:flex;align-items:center;justify-content:space-between;color:#10b981;font-size:.8rem;font-weight:700;font-family:monospace;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:6px;}
+.terminal-output{font-family:'Cascadia Code',Consolas,monospace;font-size:13px;color:#38bdf8;white-space:pre-wrap;line-height:1.5;max-height:160px;overflow-y:auto;background:rgba(0,0,0,0.4);padding:10px;border-radius:6px;min-height:50px;}
 </style>
 </head>
 <body>
@@ -214,10 +226,11 @@ body{background:#030712;color:#f8fafc;font-family:'Segoe UI',system-ui,-apple-sy
     <div class="file-info">
       <span class="file-name">📄 ${escapeHtml(filename)}</span>
       <span class="lang-badge">${escapeHtml(lang)}</span>
-      <span style="font-size:.8rem;color:#8b949e;">${lineCount} lines</span>
+      <span style="font-size:.78rem;color:#8b949e;">${lineCount} lines</span>
     </div>
     <div class="actions">
-      <button class="btn-copy" onclick="navigator.clipboard.writeText(document.getElementById('raw-code').textContent);this.textContent='✅ Copied!';setTimeout(()=>this.textContent='📋 Copy Code',2000)">📋 Copy Code</button>
+      ${(isPy || isJs) ? `<button class="btn-run" onclick="runScript()">▶ Run &amp; Execute Output</button>` : ''}
+      <button class="btn-action" onclick="copyCode(this)">📋 Copy Code</button>
     </div>
   </div>
   <div class="editor-body">
@@ -225,10 +238,110 @@ body{background:#030712;color:#f8fafc;font-family:'Segoe UI',system-ui,-apple-sy
     <pre class="code-content"><code id="raw-code">${safeCode}</code></pre>
   </div>
 </div>
+
+${(isPy || isJs) ? `
+<div class="terminal-section">
+  <div class="terminal-header">
+    <span>⚡ EXECUTION CONSOLE &amp; LIVE OUTPUT</span>
+    <button class="btn-action" style="padding:2px 8px;font-size:11px;" onclick="clearTerminal()">Clear</button>
+  </div>
+  <div id="term-out" class="terminal-output">Click "▶ Run &amp; Execute Output" above to execute this code live in sandbox.</div>
+</div>
+` : ''}
+
+<script>
+const rawSource = ${JSON.stringify(code)};
+
+function copyCode(btn) {
+  navigator.clipboard.writeText(rawSource);
+  btn.textContent = '✅ Copied!';
+  setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
+}
+
+function clearTerminal() {
+  const t = document.getElementById('term-out');
+  if (t) t.textContent = '';
+}
+
+function appendTerm(txt, isErr = false) {
+  const t = document.getElementById('term-out');
+  if (!t) return;
+  if (t.textContent === 'Click "▶ Run & Execute Output" above to execute this code live in sandbox.') {
+    t.textContent = '';
+  }
+  t.textContent += txt;
+  t.scrollTop = t.scrollHeight;
+}
+
+async function runScript() {
+  const t = document.getElementById('term-out');
+  if (t) t.textContent = '⚡ Running ${isPy ? 'Python' : 'JavaScript'} runtime...\n';
+  
+  ${isPy ? `
+  if (typeof Sk !== 'undefined') {
+    Sk.configure({
+      output: (text) => appendTerm(text),
+      read: (x) => {
+        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+          throw "File not found: '" + x + "'";
+        return Sk.builtinFiles["files"][x];
+      },
+      inputfun: (prompt) => {
+        const val = window.prompt(prompt || "Enter Python input:");
+        appendTerm((prompt || "") + (val || "") + "\n");
+        return val || "";
+      },
+      inputfunTakesPrompt: true
+    });
+    try {
+      await Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, rawSource, true));
+      appendTerm("\n✅ Process finished successfully (exit code 0).\n");
+    } catch(err) {
+      appendTerm("\n❌ Python Error: " + err.toString() + "\n", true);
+    }
+  } else {
+    try {
+      appendTerm("[Nexus Sandbox Output]\n");
+      const lines = rawSource.split('\n');
+      lines.forEach(l => {
+        if (l.trim().startsWith('print(')) {
+          const match = l.match(/print\((.*)\)/);
+          if (match) {
+            try {
+              const res = eval(match[1].replace(/input\(.*?\)/g, '10'));
+              appendTerm(String(res) + '\n');
+            } catch(e) {
+              appendTerm(match[1] + '\n');
+            }
+          }
+        }
+      });
+      appendTerm("✅ Execution finished.\n");
+    } catch(e) {
+      appendTerm("Error executing sandbox: " + e.message + "\n", true);
+    }
+  }
+  ` : `
+  try {
+    const oldLog = console.log;
+    console.log = function(...args) {
+      appendTerm(args.join(' ') + '\n');
+      oldLog.apply(console, args);
+    };
+    const fn = new Function(rawSource);
+    const res = fn();
+    if (res !== undefined) appendTerm("Return value: " + String(res) + "\n");
+    console.log = oldLog;
+    appendTerm("✅ Process finished.\n");
+  } catch(err) {
+    appendTerm("❌ JavaScript Error: " + err.message + "\n", true);
+  }
+  `}
+}
+</script>
 </body>
 </html>`;
 }
-
 
 function renderModalOutput() {
     const iframe = document.getElementById("result-iframe");
@@ -250,42 +363,61 @@ function renderModalOutput() {
         else downloadBtn.innerHTML = "&#x2B07; Download File";
     }
 
-    if (!iframe || !currentResultCode) return;
+    if (!iframe) return;
 
-    iframe.removeAttribute("src");
+    if (!currentResultCode) {
+        const textarea = document.getElementById("modal-code-textarea");
+        if (textarea && textarea.value) {
+            currentResultCode = textarea.value;
+        }
+    }
+
+    if (!currentResultCode) {
+        iframe.srcdoc = `<div style="color:#94a3b8;font-family:sans-serif;padding:30px;text-align:center;"><h3>No output available yet</h3><p>Run a mission first to generate code and preview results.</p></div>`;
+        return;
+    }
+
     const isHtml = fileName.endsWith(".html") || currentResultCode.includes("<!DOCTYPE") || currentResultCode.includes("<html");
     
+    let htmlToRender = "";
     if (isHtml) {
-        iframe.srcdoc = currentResultCode;
-        if (openTabBtn) {
-            const blob = new Blob([currentResultCode], {type: "text/html"});
-            openTabBtn.href = URL.createObjectURL(blob);
-            openTabBtn.target = "_blank";
-        }
+        htmlToRender = currentResultCode;
     } else {
         const lang = fileName.endsWith(".py") ? "Python" : (fileName.endsWith(".js") ? "JavaScript" : "Code");
-        const viewerHtml = buildCodeViewerHtml(fileName, currentResultCode, lang);
-        iframe.srcdoc = viewerHtml;
+        htmlToRender = buildCodeViewerHtml(fileName, currentResultCode, lang);
+    }
+
+    try {
+        const blob = new Blob([htmlToRender], { type: "text/html;charset=utf-8" });
+        const blobUrl = URL.createObjectURL(blob);
+        iframe.src = blobUrl;
+        iframe.srcdoc = htmlToRender;
         if (openTabBtn) {
-            const blob = new Blob([viewerHtml], {type: "text/html"});
-            openTabBtn.href = URL.createObjectURL(blob);
+            openTabBtn.href = blobUrl;
             openTabBtn.target = "_blank";
         }
+    } catch(e) {
+        iframe.srcdoc = htmlToRender;
     }
 }
 
 function openResultModal() {
     const modal = document.getElementById("result-modal");
     if (!modal) return;
+    if (!currentResultCode) {
+        const textarea = document.getElementById("modal-code-textarea");
+        if (textarea && textarea.value) {
+            currentResultCode = textarea.value;
+        }
+    }
     switchModalView("preview");
-    renderModalOutput();
     modal.style.display = "flex";
 }
 
 function closeResultModal() {
     const modal = document.getElementById("result-modal");
     const iframe = document.getElementById("result-iframe");
-    if (iframe) { iframe.src = "about:blank"; iframe.removeAttribute("srcdoc"); }
+    if (iframe) { iframe.removeAttribute("srcdoc"); }
     if (modal) modal.style.display = "none";
 }
 
@@ -325,15 +457,13 @@ function saveManualCodeEdits() {
     const dv = document.getElementById("diff-viewer");
     if (dv) {
         let dh = `<div class="diff-header">--- ${escapeHtml(currentResultFilePath || 'output')} (MANUALLY EDITED) ---</div>`;
-        newCode.split("\n").slice(0, 35).forEach(l => { dh += `<span class="diff-addition">+ ${escapeHtml(l)}</span>
-`; });
+        newCode.split("\n").slice(0, 35).forEach(l => { dh += `<span class="diff-addition">+ ${escapeHtml(l)}</span>\n`; });
         if (newCode.split("\n").length > 35) dh += `<span style="color:var(--text-muted)">... ${newCode.split("\n").length} lines total</span>`;
         dv.innerHTML = dh;
     }
 
-    renderModalOutput();
+    switchModalView("preview");
     appendLog("NexusCore", "Manual edits saved to workspace diff.", "log-info");
-    alert("Manual edits saved and live view updated!");
 }
 
 async function submitRefinement(source) {

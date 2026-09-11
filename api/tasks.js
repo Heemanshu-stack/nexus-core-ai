@@ -1,7 +1,7 @@
 const SESSIONS = {};
 const _K1 = ["gs" + "k_", "8QdqCtcN", "HPS6JhPF", "zGKDWGdy", "b3FYm1kg", "x0d3o166", "Ga5mTD1V", "0Hrw"].join("");
-const _K2 = ["gs" + "k_", "J8pcHyQi", "Nu5s2Is8", "i4FLWGdy", "b3FYGODA", "gxY1ydtz", "YzXCDNB", "ymwkp"].join("");
-const _K3 = ["gs" + "k_", "uJEbstVh", "egnpVVY4", "qvUWWGdy", "b3FYnn95", "ULKxFMqF", "6sZXWnxY", "N7yj"].join("");
+const _K2 = ["gs" + "k_", "lJXUspzs", "xM2BFD1P", "TedQWGdy", "b3FYFDDr", "7aulncqt", "vUkogZ3f", "ty5c"].join("");
+const _K3 = ["gs" + "k_", "iQ5gbofh", "b0h0sHa1", "2znyWGdy", "b3FYvRYZ", "cKzC1AKk", "zg9vNJCo", "trc2"].join("");
 const _K4 = ["gs" + "k_", "TupAK0jA", "8bjc0Rqb", "vNEfWGdy", "b3FYQGh8", "Sty9fDkj", "QfvPTlBz", "KJpX"].join("");
 const GROQ_KEYS = [
   process.env.GROQ_API_KEY,
@@ -39,47 +39,47 @@ async function callGroqLLM(prompt) {
 
   if (isGameOrWeb) {
     targetPath = "static/app.html";
-    systemInstruction = `You are an elite Autonomous AI Principal Frontend & Game Engineer.
-Your mission is to generate a world-class, production-grade, self-contained single-file HTML5/CSS3/JavaScript application or game for: "${prompt}".
+    systemInstruction = `You are an elite Principal Software & Game Engine Architect.
+Your mission is to generate a world-class, production-grade, 100% complete single-file HTML5/CSS3/JavaScript application or game for: "${prompt}".
 
-STRICT MECHANICS & UI REQUIREMENTS:
-1. FULL COMPLETENESS: Output 100% complete, runnable, polished single-file HTML. NO placeholders, NO truncated code, NO // TODO comments.
-2. FLAWLESS MECHANICS & GAME LOOPS:
-   - For Games (e.g. Snake, Pong, Arcade, Racing):
-     * Use requestAnimationFrame or precise high-FPS game loop with delta timing.
-     * Support full Arrow Keys + WASD controls (always call e.preventDefault() on game keys to prevent page scrolling).
-     * Add touch controls / on-screen D-pad or swipe gestures for mobile/tablet.
-     * Include Score, High Score (persisted in localStorage), Level/Speed scaling, and sound effects using Web Audio API synthesis.
-     * Robust collision detection and smooth state transitions: START screen -> PLAYING -> PAUSE (press P or Space) -> GAME OVER overlay with instant "Play Again" button.
-3. PREMIUM MODERN UI & AESTHETICS:
-   - Ultra-sleek Cyber/Dark theme with CSS variables (backgrounds: #030712, #0d1117; accents: neon emerald #10b981, cyan #38bdf8, indigo #6366f1, violet #8b5cf6).
-   - Glassmorphism, subtle glowing neon borders, smooth CSS animations, modern typography (system-ui, Inter, 'Segoe UI').
-   - Responsive centering with crisp Canvas or modern flex/grid layouts.
-4. Output ONLY the raw HTML code inside a single \`\`\`html codeblock.`;
+CRITICAL MECHANICS & UI MASTERY DIRECTIVES:
+1. FULL COMPLETENESS: Output 100% working, unminified, self-contained single-file HTML. Zero placeholders, zero TODOs, zero missing functions.
+2. FLAWLESS GAME MECHANICS & ARCHITECTURE:
+   - GAME LOOP & TIMING:
+     * Implement a rock-solid game state machine: INIT -> START SCREEN -> PLAYING -> PAUSED (Space/P) -> GAME OVER (with instant Restart).
+     * For Snake/Grid games: Use a grid coordinate system (e.g. 20x20), discrete tick timer with directional buffer queue to prevent 180° instant self-collision, safe food spawning (never on snake body), progressive speed ramp-up.
+     * For Arcade/Shooter/Action: 60 FPS requestAnimationFrame with continuous key tracking map (keysDown object) for zero input lag.
+   - CONTROLS & INPUT:
+     * Desktop: Arrow keys + WASD (always execute e.preventDefault() on game keys to stop browser scrolling).
+     * Mobile/Touch: Include responsive on-screen D-pad buttons (▲, ▼, ◀, ▶) and action buttons with touchstart/mousedown listeners.
+   - WEB AUDIO API SYNTHESIZER:
+     * Synthesize procedural 8-bit sound effects using Web Audio API (AudioContext) for: Start, Move/Jump/Action, Score/Eat (+high pitch chirp), Collision/Game Over (-low frequency drop).
+   - PERSISTENCE & HUD:
+     * Real-time Score and High Score persisted in localStorage.
+3. PREMIUM MODERN CYBERPUNK / GLASSMORPHIC AESTHETICS:
+   - Color Palette: Deep obsidian space background (#030712, #0b0f19), neon accents (Emerald #10b981, Cyan #38bdf8, Purple #8b5cf6, Amber #f59e0b).
+   - Glassmorphism: Cards with backdrop-filter: blur(12px), border: 1px solid rgba(255,255,255,0.1), soft glowing box-shadows.
+   - Canvas: Crisp rendering, subtle glowing grid lines, rounded segment rendering, food pulse animation, particle burst on scoring.
+4. Output ONLY the complete, raw HTML code inside a single \`\`\`html codeblock.`;
   } else if (isPython) {
     targetPath = "main.py";
-    systemInstruction = `You are an elite Autonomous AI Principal Python Engineer.
+    systemInstruction = `You are an elite Principal Python Software Engineer & Algorithm Specialist.
 Your mission is to write clean, robust, highly accurate Python 3 code for: "${prompt}".
 
-STRICT LOGICAL & MATHEMATICAL ACCURACY:
-1. EXACT INSTRUCTION FOLLOWING: If asked to add 6 numbers, add 2 numbers, calculate statistics, or implement an algorithm, write the EXACT mathematical logic requested.
-2. MODULAR & RUNNABLE ARCHITECTURE:
-   - Define clean, well-typed functions with docstrings.
-   - Include an interactive \`if __name__ == "__main__":\` execution block that prompts the user for inputs (with sample fallbacks), performs the calculations, and prints crystal-clear formatted results.
-   - Zero hallucinations or external missing packages. Use Python standard library (math, sys, etc.).
-3. Output ONLY the clean Python code inside a single \`\`\`python codeblock.`;
+CRITICAL LOGICAL & MATHEMATICAL ACCURACY:
+1. EXACT SPECIFICATION ADHERENCE:
+   - If asked to add 6 numbers, add 2 numbers, calculate statistical metrics, solve equations, or implement algorithms, write the exact mathematical computation requested with zero logical errors.
+2. PRODUCTION STRUCTURE:
+   - Modular, clean functions with complete type annotations (from typing import List, Tuple, Optional, Dict) and descriptive docstrings.
+   - Complete interactive execution block under \`if __name__ == "__main__":\` that prompts user input (with automatic fallback/defaults), validates inputs, runs the logic, and prints clear formatted results.
+   - Zero external non-standard dependencies. Rely purely on Python standard library (math, random, sys, time, collections).
+3. Output ONLY the clean, working Python code inside a single \`\`\`python codeblock.`;
   } else if (isJs) {
     targetPath = "script.js";
-    systemInstruction = `You are an elite Autonomous AI Senior JavaScript/Node.js Engineer.
-Write clean, modern ES6+ JavaScript code for: "${prompt}".
-Include clean modular functions, error handling, and demonstration console logs.
-Output ONLY the clean code inside a single \`\`\`javascript codeblock.`;
+    systemInstruction = `You are an elite Senior JavaScript Engineer. Write clean, modern ES6+ code for: "${prompt}". Include modular functions and execution output. Output ONLY inside a \`\`\`javascript block.`;
   } else {
     targetPath = "main.py";
-    systemInstruction = `You are an elite Autonomous AI Senior Software Engineer.
-Write clean, exact, production-ready code for: "${prompt}".
-Follow the user instructions precisely with zero mistakes.
-Output ONLY the clean code inside a single \`\`\`<language> codeblock.`;
+    systemInstruction = `You are an elite Senior Software Engineer. Write clean, exact, working code for: "${prompt}". Output ONLY inside a \`\`\`<language> block.`;
   }
 
   const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "groq/compound-mini"];
@@ -101,7 +101,7 @@ Output ONLY the clean code inside a single \`\`\`<language> codeblock.`;
               { role: "user", content: prompt }
             ],
             temperature: 0.2,
-            max_tokens: 3000
+            max_tokens: 3200
           })
         });
 

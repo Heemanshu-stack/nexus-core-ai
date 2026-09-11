@@ -54,8 +54,6 @@ function submitTask() {
     if (!promptInput) return;
     const prompt = promptInput.value.trim();
     if (!prompt) { alert("Please enter a mission requirement first!"); return; }
-    
-    // Direct Real-Time Agent Swarm Execution (Zero Latency)
     runRealNeuralAgentSwarm(prompt);
 }
 
@@ -63,163 +61,166 @@ function buildCodeViewerHtml(filename, code, lang) {
     const safeCode = escapeHtml(code);
     const lineCount = code.split("\n").length;
     let lineNums = "";
-    for(let i=1; i<=lineCount; i++) lineNums += `<div>${i}</div>`;
+    for(let i=1; i<=lineCount; i++) lineNums += "<div>" + i + "</div>";
     
     const isPy = (filename || "").endsWith(".py") || (lang && lang.toLowerCase() === "python");
     const isJs = (filename || "").endsWith(".js") || (lang && lang.toLowerCase() === "javascript");
 
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${escapeHtml(filename)} - Nexus Core AI</title>
-${isPy ? `
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
-` : ''}
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#030712;color:#f8fafc;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;padding:16px;min-height:100vh;display:flex;flex-direction:column;gap:12px;}
-.editor-container{background:#0d1117;border:1px solid rgba(56,189,248,.25);border-radius:12px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,.6);flex:1;display:flex;flex-direction:column;min-height:220px;}
-.editor-header{background:#161b22;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:8px;}
-.file-info{display:flex;align-items:center;gap:8px;}
-.file-name{font-size:.9rem;font-weight:700;color:#38bdf8;font-family:'Cascadia Code',Consolas,monospace;}
-.lang-badge{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-.actions{display:flex;gap:8px;align-items:center;}
-.btn-action{background:rgba(255,255,255,0.08);color:#f8fafc;border:1px solid rgba(255,255,255,0.15);padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
-.btn-action:hover{background:rgba(255,255,255,0.16);transform:translateY(-1px);}
-.btn-run{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 2px 10px rgba(16,185,129,0.3);}
-.btn-run:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(16,185,129,0.5);}
-.editor-body{display:flex;flex:1;overflow:auto;background:#0d1117;font-family:'Cascadia Code','Fira Code',Consolas,Monaco,monospace;font-size:13.5px;line-height:1.6;max-height:260px;}
-.gutter{padding:14px 12px;color:#484f58;text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.08);font-size:12.5px;min-width:40px;background:#090d13;}
-.code-content{padding:14px 16px;color:#e6edf3;white-space:pre;overflow-x:auto;flex:1;}
-.terminal-section{background:#030712;border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
-.terminal-header{display:flex;align-items:center;justify-content:space-between;color:#10b981;font-size:.8rem;font-weight:700;font-family:monospace;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:6px;}
-.terminal-output{font-family:'Cascadia Code',Consolas,monospace;font-size:13px;color:#38bdf8;white-space:pre-wrap;line-height:1.5;max-height:160px;overflow-y:auto;background:rgba(0,0,0,0.4);padding:10px;border-radius:6px;min-height:50px;}
-</style>
-</head>
-<body>
-<div class="editor-container">
-  <div class="editor-header">
-    <div class="file-info">
-      <span class="file-name">📄 ${escapeHtml(filename)}</span>
-      <span class="lang-badge">${escapeHtml(lang)}</span>
-      <span style="font-size:.78rem;color:#8b949e;">${lineCount} lines</span>
-    </div>
-    <div class="actions">
-      ${(isPy || isJs) ? `<button class="btn-run" onclick="runScript()">▶ Run &amp; Execute Output</button>` : ''}
-      <button class="btn-action" onclick="copyCode(this)">📋 Copy Code</button>
-    </div>
-  </div>
-  <div class="editor-body">
-    <div class="gutter">${lineNums}</div>
-    <pre class="code-content"><code id="raw-code">${safeCode}</code></pre>
-  </div>
-</div>
-
-${(isPy || isJs) ? `
-<div class="terminal-section">
-  <div class="terminal-header">
-    <span>⚡ EXECUTION CONSOLE &amp; LIVE OUTPUT</span>
-    <button class="btn-action" style="padding:2px 8px;font-size:11px;" onclick="clearTerminal()">Clear</button>
-  </div>
-  <div id="term-out" class="terminal-output">Click "▶ Run &amp; Execute Output" above to execute this code live in sandbox.</div>
-</div>
-` : ''}
-
-<script>
-const rawSource = ${JSON.stringify(code)};
-
-function copyCode(btn) {
-  navigator.clipboard.writeText(rawSource);
-  btn.textContent = '✅ Copied!';
-  setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
-}
-
-function clearTerminal() {
-  const t = document.getElementById('term-out');
-  if (t) t.textContent = '';
-}
-
-function appendTerm(txt, isErr = false) {
-  const t = document.getElementById('term-out');
-  if (!t) return;
-  if (t.textContent === 'Click "▶ Run & Execute Output" above to execute this code live in sandbox.') {
-    t.textContent = '';
-  }
-  t.textContent += txt;
-  t.scrollTop = t.scrollHeight;
-}
-
-async function runScript() {
-  const t = document.getElementById('term-out');
-  if (t) t.textContent = '⚡ Running ${isPy ? 'Python' : 'JavaScript'} runtime...\n';
-  
-  ${isPy ? `
-  if (typeof Sk !== 'undefined') {
-    Sk.configure({
-      output: (text) => appendTerm(text),
-      read: (x) => {
-        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-          throw "File not found: '" + x + "'";
-        return Sk.builtinFiles["files"][x];
-      },
-      inputfun: (prompt) => {
-        const val = window.prompt(prompt || "Enter Python input:");
-        appendTerm((prompt || "") + (val || "") + "\n");
-        return val || "";
-      },
-      inputfunTakesPrompt: true
-    });
-    try {
-      await Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, rawSource, true));
-      appendTerm("\n✅ Process finished successfully (exit code 0).\n");
-    } catch(err) {
-      appendTerm("\n❌ Python Error: " + err.toString() + "\n", true);
+    let pyScripts = "";
+    if (isPy) {
+        pyScripts = '<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"><\/script><script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"><\/script>';
     }
-  } else {
-    try {
-      appendTerm("[Nexus Sandbox Output]\n");
-      const lines = rawSource.split('\n');
-      lines.forEach(l => {
-        if (l.trim().startsWith('print(')) {
-          const match = l.match(/print\((.*)\)/);
-          if (match) {
-            try {
-              const res = eval(match[1].replace(/input\(.*?\)/g, '10'));
-              appendTerm(String(res) + '\n');
-            } catch(e) {
-              appendTerm(match[1] + '\n');
-            }
-          }
-        }
-      });
-      appendTerm("✅ Execution finished.\n");
-    } catch(e) {
-      appendTerm("Error executing sandbox: " + e.message + "\n", true);
+
+    let runButton = "";
+    if (isPy || isJs) {
+        runButton = '<button class="btn-run" onclick="runScript()">▶ Run &amp; Execute Output</button>';
     }
-  }
-  ` : `
-  try {
-    const oldLog = console.log;
-    console.log = function(...args) {
-      appendTerm(args.join(' ') + '\n');
-      oldLog.apply(console, args);
-    };
-    const fn = new Function(rawSource);
-    const res = fn();
-    if (res !== undefined) appendTerm("Return value: " + String(res) + "\n");
-    console.log = oldLog;
-    appendTerm("✅ Process finished.\n");
-  } catch(err) {
-    appendTerm("❌ JavaScript Error: " + err.message + "\n", true);
-  }
-  `}
-}
-</script>
-</body>
-</html>`;
+
+    let termHtml = "";
+    if (isPy || isJs) {
+        termHtml = '<div class="terminal-section">' +
+          '<div class="terminal-header">' +
+          '<span>⚡ EXECUTION CONSOLE &amp; LIVE OUTPUT</span>' +
+          '<button class="btn-action" style="padding:2px 8px;font-size:11px;" onclick="clearTerminal()">Clear</button>' +
+          '</div>' +
+          '<div id="term-out" class="terminal-output">Click "▶ Run &amp; Execute Output" above to execute this code live in sandbox.</div>' +
+          '</div>';
+    }
+
+    return '<!DOCTYPE html>' +
+'<html lang="en">' +
+'<head>' +
+'<meta charset="UTF-8">' +
+'<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+'<title>' + escapeHtml(filename) + ' - Nexus Core AI</title>' +
+pyScripts +
+'<style>' +
+'*{margin:0;padding:0;box-sizing:border-box;}' +
+'body{background:#030712;color:#f8fafc;font-family:\'Segoe UI\',system-ui,-apple-system,sans-serif;padding:16px;min-height:100vh;display:flex;flex-direction:column;gap:12px;}' +
+'.editor-container{background:#0d1117;border:1px solid rgba(56,189,248,.25);border-radius:12px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,.6);flex:1;display:flex;flex-direction:column;min-height:220px;}' +
+'.editor-header{background:#161b22;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;gap:8px;}' +
+'.file-info{display:flex;align-items:center;gap:8px;}' +
+'.file-name{font-size:.9rem;font-weight:700;color:#38bdf8;font-family:\'Cascadia Code\',Consolas,monospace;}' +
+'.lang-badge{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}' +
+'.actions{display:flex;gap:8px;align-items:center;}' +
+'.btn-action{background:rgba(255,255,255,0.08);color:#f8fafc;border:1px solid rgba(255,255,255,0.15);padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}' +
+'.btn-action:hover{background:rgba(255,255,255,0.16);transform:translateY(-1px);}' +
+'.btn-run{background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s;box-shadow:0 2px 10px rgba(16,185,129,0.3);}' +
+'.btn-run:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(16,185,129,0.5);}' +
+'.editor-body{display:flex;flex:1;overflow:auto;background:#0d1117;font-family:\'Cascadia Code\',\'Fira Code\',Consolas,Monaco,monospace;font-size:13.5px;line-height:1.6;max-height:260px;}' +
+'.gutter{padding:14px 12px;color:#484f58;text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.08);font-size:12.5px;min-width:40px;background:#090d13;}' +
+'.code-content{padding:14px 16px;color:#e6edf3;white-space:pre;overflow-x:auto;flex:1;}' +
+'.terminal-section{background:#030712;border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;}' +
+'.terminal-header{display:flex;align-items:center;justify-content:space-between;color:#10b981;font-size:.8rem;font-weight:700;font-family:monospace;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:6px;}' +
+'.terminal-output{font-family:\'Cascadia Code\',Consolas,monospace;font-size:13px;color:#38bdf8;white-space:pre-wrap;line-height:1.5;max-height:160px;overflow-y:auto;background:rgba(0,0,0,0.4);padding:10px;border-radius:6px;min-height:50px;}' +
+'</style>' +
+'</head>' +
+'<body>' +
+'<div class="editor-container">' +
+'  <div class="editor-header">' +
+'    <div class="file-info">' +
+'      <span class="file-name">📄 ' + escapeHtml(filename) + '</span>' +
+'      <span class="lang-badge">' + escapeHtml(lang) + '</span>' +
+'      <span style="font-size:.78rem;color:#8b949e;">' + lineCount + ' lines</span>' +
+'    </div>' +
+'    <div class="actions">' +
+runButton +
+'      <button class="btn-action" onclick="copyCode(this)">📋 Copy Code</button>' +
+'    </div>' +
+'  </div>' +
+'  <div class="editor-body">' +
+'    <div class="gutter">' + lineNums + '</div>' +
+'    <pre class="code-content"><code id="raw-code">' + safeCode + '</code></pre>' +
+'  </div>' +
+'</div>' +
+termHtml +
+'<script>' +
+'const rawSource = ' + JSON.stringify(code) + ';' +
+'function copyCode(btn) {' +
+'  navigator.clipboard.writeText(rawSource);' +
+'  btn.textContent = "✅ Copied!";' +
+'  setTimeout(() => btn.textContent = "📋 Copy Code", 2000);' +
+'}' +
+'function clearTerminal() {' +
+'  const t = document.getElementById("term-out");' +
+'  if (t) t.textContent = "";' +
+'}' +
+'function appendTerm(txt, isErr) {' +
+'  const t = document.getElementById("term-out");' +
+'  if (!t) return;' +
+'  if (t.textContent === "Click \"▶ Run & Execute Output\" above to execute this code live in sandbox.") {' +
+'    t.textContent = "";' +
+'  }' +
+'  t.textContent += txt;' +
+'  t.scrollTop = t.scrollHeight;' +
+'}' +
+'async function runScript() {' +
+'  const t = document.getElementById("term-out");' +
+'  if (t) t.textContent = "⚡ Running execution runtime...\n";' +
+(isPy ?
+'  if (typeof Sk !== "undefined") {' +
+'    Sk.configure({' +
+'      output: (text) => appendTerm(text),' +
+'      read: (x) => {' +
+'        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)' +
+'          throw "File not found: \x27" + x + "\x27";' +
+'        return Sk.builtinFiles["files"][x];' +
+'      },' +
+'      inputfun: (prompt) => {' +
+'        const val = window.prompt(prompt || "Enter Python input:");' +
+'        appendTerm((prompt || "") + (val || "") + "\n");' +
+'        return val || "";' +
+'      },' +
+'      inputfunTakesPrompt: true' +
+'    });' +
+'    try {' +
+'      await Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, rawSource, true));' +
+'      appendTerm("\n✅ Process finished successfully (exit code 0).\n");' +
+'    } catch(err) {' +
+'      appendTerm("\n❌ Python Error: " + err.toString() + "\n", true);' +
+'    }' +
+'  } else {' +
+'    try {' +
+'      appendTerm("[Nexus Sandbox Output]\n");' +
+'      const lines = rawSource.split("\n");' +
+'      lines.forEach(l => {' +
+'        if (l.trim().startsWith("print(")) {' +
+'          const match = l.match(/print\((.*)\)/);' +
+'          if (match) {' +
+'            try {' +
+'              const res = eval(match[1].replace(/input\(.*?\)/g, "10"));' +
+'              appendTerm(String(res) + "\n");' +
+'            } catch(e) {' +
+'              appendTerm(match[1] + "\n");' +
+'            }' +
+'          }' +
+'        }' +
+'      });' +
+'      appendTerm("✅ Execution finished.\n");' +
+'    } catch(e) {' +
+'      appendTerm("Error executing sandbox: " + e.message + "\n", true);' +
+'    }' +
+'  }'
+:
+'  try {' +
+'    const oldLog = console.log;' +
+'    console.log = function(...args) {' +
+'      appendTerm(args.join(" ") + "\n");' +
+'      oldLog.apply(console, args);' +
+'    };' +
+'    const fn = new Function(rawSource);' +
+'    const res = fn();' +
+'    if (res !== undefined) appendTerm("Return value: " + String(res) + "\n");' +
+'    console.log = oldLog;' +
+'    appendTerm("✅ Process finished.\n");' +
+'  } catch(err) {' +
+'    appendTerm("❌ JavaScript Error: " + err.message + "\n", true);' +
+'  }'
+) +
+'}' +
+'</script>' +
+'</body>' +
+'</html>';
 }
 
 function renderModalOutput() {
@@ -252,7 +253,7 @@ function renderModalOutput() {
     }
 
     if (!currentResultCode) {
-        iframe.srcdoc = `<div style="color:#94a3b8;font-family:sans-serif;padding:30px;text-align:center;"><h3>No output available yet</h3><p>Run a mission first to generate code and preview results.</p></div>`;
+        iframe.srcdoc = '<div style="color:#94a3b8;font-family:sans-serif;padding:30px;text-align:center;"><h3>No output available yet</h3><p>Run a mission first to generate code and preview results.</p></div>';
         return;
     }
 
@@ -334,9 +335,9 @@ function saveManualCodeEdits() {
     
     const dv = document.getElementById("diff-viewer");
     if (dv) {
-        let dh = `<div class="diff-header">--- ${escapeHtml(currentResultFilePath || 'output')} (MANUALLY EDITED) ---</div>`;
-        newCode.split("\n").slice(0, 35).forEach(l => { dh += `<span class="diff-addition">+ ${escapeHtml(l)}</span>\n`; });
-        if (newCode.split("\n").length > 35) dh += `<span style="color:var(--text-muted)">... ${newCode.split("\n").length} lines total</span>`;
+        let dh = '<div class="diff-header">--- ' + escapeHtml(currentResultFilePath || 'output') + ' (MANUALLY EDITED) ---</div>';
+        newCode.split("\n").slice(0, 35).forEach(l => { dh += '<span class="diff-addition">+ ' + escapeHtml(l) + '</span>\n'; });
+        if (newCode.split("\n").length > 35) dh += '<span style="color:var(--text-muted)">... ' + newCode.split("\n").length + ' lines total</span>';
         dv.innerHTML = dh;
     }
 
@@ -375,26 +376,9 @@ async function submitRefinement(source) {
     const isHtml = (currentResultFilePath || "").endsWith(".html") || (currentResultCode && (currentResultCode.includes("<!DOCTYPE") || currentResultCode.includes("<html")));
     const lang = isPython ? "Python" : (isHtml ? "HTML" : "JavaScript");
 
-    const systemInstruction = isHtml ? `You are an elite Principal Game & UI Engineer. The user previously generated this HTML5/JS/CSS app/game and reported an issue or requested changes.
-Existing Code:
-```html
-${currentResultCode || ""}
-```
-
-USER FEEDBACK / DEFECT: "${refineText}"
-
-CRITICAL REPAIR INSTRUCTIONS:
-1. Fix all gameplay/UI bugs completely: Ensure game loop runs, canvas initializes cleanly, keys (Arrow keys + WASD) and touch D-pad buttons work, collision is exact, start & restart buttons work seamlessly.
-2. Return the 100% COMPLETE, fixed, single-file HTML. Zero placeholders, zero truncation.
-3. Output ONLY the complete HTML code inside a single \`\`\`html block.` : `You are an elite Software Engineer. The user wants modifications to this code.
-Existing Code:
-```${lang.toLowerCase()}
-${currentResultCode || ""}
-```
-
-USER INSTRUCTION: "${refineText}"
-
-Apply their changes cleanly with zero errors. Return 100% complete working code inside a single \`\`\`${lang.toLowerCase()} block.`;
+    const systemInstruction = isHtml 
+        ? "You are an elite Principal Game & UI Engineer. The user previously generated an HTML5 game/app and requested changes.\nExisting Code:\n" + (currentResultCode || "") + "\nUSER FEEDBACK: " + refineText + "\nFix all gameplay, mechanics, canvas, and UI bugs. Output ONLY complete HTML inside a \x60\x60\x60html block."
+        : "You are an elite Software Engineer. The user requested modifications.\nExisting Code:\n" + (currentResultCode || "") + "\nUSER FEEDBACK: " + refineText + "\nOutput ONLY complete code inside a \x60\x60\x60" + lang.toLowerCase() + " block.";
 
     const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "groq/compound-mini"];
     let updatedCode = "";
@@ -443,9 +427,9 @@ Apply their changes cleanly with zero errors. Return 100% complete working code 
         
         const dv = document.getElementById("diff-viewer");
         if (dv) {
-            let dh = `<div class="diff-header">--- ${escapeHtml(currentResultFilePath || 'output')} (REFINED) ---</div>`;
-            updatedCode.split("\n").slice(0, 35).forEach(l => { dh += `<span class="diff-addition">+ ${escapeHtml(l)}</span>\n`; });
-            if (updatedCode.split("\n").length > 35) dh += `<span style="color:var(--text-muted)">... ${updatedCode.split("\n").length} lines total</span>`;
+            let dh = '<div class="diff-header">--- ' + escapeHtml(currentResultFilePath || 'output') + ' (REFINED) ---</div>';
+            updatedCode.split("\n").slice(0, 35).forEach(l => { dh += '<span class="diff-addition">+ ' + escapeHtml(l) + '</span>\n'; });
+            if (updatedCode.split("\n").length > 35) dh += '<span style="color:var(--text-muted)">... ' + updatedCode.split("\n").length + ' lines total</span>';
             dv.innerHTML = dh;
         }
 
@@ -482,7 +466,7 @@ function showResultBanner() {
     if (rc) rc.style.display = "flex";
 }
 
-async function approveDiff() {
+function approveDiff() {
     appendLog("HumanApprovalGate", "User authorized patch. Applying to workspace...", "log-info");
     appendLog("FileEditorTool", "Patched: " + (currentResultFilePath || "application"), "log-info");
     const ar = document.getElementById("approval-actions"); if (ar) ar.style.display = "none";
@@ -496,7 +480,7 @@ async function approveDiff() {
     }, 500);
 }
 
-async function rejectDiff() {
+function rejectDiff() {
     appendLog("HumanApprovalGate", "Patch rejected by operator.", "log-warning");
     const ar = document.getElementById("approval-actions"); if (ar) ar.style.display = "none";
     setSystemStatus("Mission Aborted", "status-ready");
@@ -510,24 +494,32 @@ async function openMemoryModal() {
     modal.style.display = "flex";
     try {
         const res = await fetch("/api/memory"); const data = await res.json();
-        let h = `<p style="color:var(--text-secondary);margin-bottom:12px;"><strong>System Version:</strong> ${data.version||'2.0.1'}</p><hr style="border-color:var(--border-subtle);margin-bottom:16px;"><ul style="list-style:none;padding:0;">`;
-        if (data.notes && data.notes.length > 0) { data.notes.forEach(n => { h += `<li style="margin-bottom:12px;padding:12px;background:rgba(0,0,0,0.1);border-radius:8px;border:1px solid var(--border-subtle);"><div style="color:var(--primary);font-weight:600;font-size:12px;margin-bottom:4px;text-transform:uppercase;">[${escapeHtml(n.tag)}]</div><div>${escapeHtml(n.content)}</div></li>`; }); }
-        else h += `<li style="color:var(--text-muted);font-style:italic;padding:20px 0;text-align:center;">No cognitive vectors stored yet.</li>`;
-        h += `</ul>`; body.innerHTML = h;
-    } catch(e) { body.innerText = "Nexus memory bank active. Cognitive vectors synchronized."; }
+        let h = '<p style="color:var(--text-secondary);margin-bottom:12px;"><strong>System Version:</strong> ' + (data.version||'2.0.1') + '</p><hr style="border-color:var(--border-subtle);margin-bottom:16px;"><ul style="list-style:none;padding:0;">';
+        if (data.notes && data.notes.length > 0) { 
+            data.notes.forEach(n => { 
+                h += '<li style="margin-bottom:12px;padding:12px;background:rgba(0,0,0,0.1);border-radius:8px;border:1px solid var(--border-subtle);"><div style="color:var(--primary);font-weight:600;font-size:12px;margin-bottom:4px;text-transform:uppercase;">[' + escapeHtml(n.tag) + ']</div><div>' + escapeHtml(n.content) + '</div></li>'; 
+            }); 
+        } else {
+            h += '<li style="color:var(--text-muted);font-style:italic;padding:20px 0;text-align:center;">No cognitive vectors stored yet.</li>';
+        }
+        h += '</ul>'; 
+        body.innerHTML = h;
+    } catch(e) { 
+        body.innerText = "Nexus memory bank active. Cognitive vectors synchronized."; 
+    }
 }
 
 function closeMemoryModal() { const m = document.getElementById("memory-modal"); if (m) m.style.display = "none"; }
-function setSystemStatus(text, className) { const p = document.getElementById("system-status-pill"); if (p) { p.innerHTML = `<span class="status-dot"></span> ${escapeHtml(text)}`; p.className = `status-pill ${className}`; } }
-function appendLog(agent, msg, level="log-info") { const el = document.getElementById("logs-container"); if (!el) return; const e = document.createElement("div"); e.className = `log-entry ${level}`; e.innerText = `[${new Date().toLocaleTimeString()}] [${agent}] ${msg}`; el.appendChild(e); el.scrollTop = el.scrollHeight; }
+function setSystemStatus(text, className) { const p = document.getElementById("system-status-pill"); if (p) { p.innerHTML = '<span class="status-dot"></span> ' + escapeHtml(text); p.className = 'status-pill ' + className; } }
+function appendLog(agent, msg, level="log-info") { const el = document.getElementById("logs-container"); if (!el) return; const e = document.createElement("div"); e.className = 'log-entry ' + level; e.innerText = '[' + new Date().toLocaleTimeString() + '] [' + agent + '] ' + msg; el.appendChild(e); el.scrollTop = el.scrollHeight; }
 function escapeHtml(t) { if (!t) return ""; return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 function resetUI() {
     lastLogCount = 0; lastStatus = ""; lastDiffCount = 0; failedPollCount = 0;
     currentResultFilePath = null; currentResultCode = null; currentResultUrl = null;
     document.querySelectorAll(".agent-node").forEach(n => n.classList.remove("active-node", "completed-node", "waiting-node"));
-    const pc = document.getElementById("plan-content"); if (pc) pc.innerHTML = `<div class="placeholder-text">Waiting for orchestrator synthesis...</div>`;
-    const dv = document.getElementById("diff-viewer"); if (dv) dv.innerHTML = `<div class="placeholder-text">Unified code diffs and semantic patches will appear here.</div>`;
+    const pc = document.getElementById("plan-content"); if (pc) pc.innerHTML = '<div class="placeholder-text">Waiting for orchestrator synthesis...</div>';
+    const dv = document.getElementById("diff-viewer"); if (dv) dv.innerHTML = '<div class="placeholder-text">Unified code diffs and semantic patches will appear here.</div>';
     const m = document.getElementById("audit-metrics"); if (m) m.style.display = "none";
     const a = document.getElementById("approval-actions"); if (a) a.style.display = "none";
     const rb = document.getElementById("result-banner"); if (rb) rb.style.display = "none";
@@ -537,7 +529,7 @@ function resetUI() {
 function extractCode(raw) {
     if (!raw) return "";
     let clean = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").replace(/\u2011/g, "-").trim();
-    const match = clean.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
+    const match = clean.match(/\x60\x60\x60(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)\x60\x60\x60/i);
     if (match && match[1] && match[1].trim().length > 10) return match[1].trim();
     if (clean.includes("<!DOCTYPE") || clean.includes("<html")) {
         const s = clean.indexOf("<!DOCTYPE") !== -1 ? clean.indexOf("<!DOCTYPE") : clean.indexOf("<html");
@@ -575,50 +567,15 @@ async function runRealNeuralAgentSwarm(prompt) {
         appendLog("RepoSearcherAgent", "Scanning workspace AST graph & imports...", "log-info");
         const n2 = document.getElementById("node-RepoSearcherAgent"); if (n2) n2.classList.add("active-node");
         const pc = document.getElementById("plan-content");
-        if (pc) pc.innerHTML = `<p class="plan-summary"><strong>Objective:</strong> ${escapeHtml(prompt)}</p><ul class="plan-list"><li><strong>Phase 1:</strong> Scan workspace AST <span style="color:var(--text-muted);font-size:.75rem;">(RepoSearcherAgent)</span></li><li><strong>Phase 2:</strong> Neural code synthesis for ${escapeHtml(targetPath)} <span style="color:var(--text-muted);font-size:.75rem;">(CoderAgent)</span></li><li><strong>Phase 3:</strong> Security audit <span style="color:var(--text-muted);font-size:.75rem;">(ReviewerAgent)</span></li><li><strong>Phase 4:</strong> Sandbox validation <span style="color:var(--text-muted);font-size:.75rem;">(TesterAgent)</span></li><li><strong>Phase 5:</strong> Operator authorization <span style="color:var(--text-muted);font-size:.75rem;">(HumanApprovalGate)</span></li></ul>`;
+        if (pc) pc.innerHTML = '<p class="plan-summary"><strong>Objective:</strong> ' + escapeHtml(prompt) + '</p><ul class="plan-list"><li><strong>Phase 1:</strong> Scan workspace AST <span style="color:var(--text-muted);font-size:.75rem;">(RepoSearcherAgent)</span></li><li><strong>Phase 2:</strong> Neural code synthesis for ' + escapeHtml(targetPath) + ' <span style="color:var(--text-muted);font-size:.75rem;">(CoderAgent)</span></li><li><strong>Phase 3:</strong> Security audit <span style="color:var(--text-muted);font-size:.75rem;">(ReviewerAgent)</span></li><li><strong>Phase 4:</strong> Sandbox validation <span style="color:var(--text-muted);font-size:.75rem;">(TesterAgent)</span></li><li><strong>Phase 5:</strong> Operator authorization <span style="color:var(--text-muted);font-size:.75rem;">(HumanApprovalGate)</span></li></ul>';
     }, 400);
 
     let generatedCode = "";
-    let systemInstruction = "";
-
-    if (isGameOrWeb) {
-        systemInstruction = `You are an elite Principal Software & Game Engine Architect.
-Your mission is to generate a world-class, production-grade, 100% complete single-file HTML5/CSS3/JavaScript application or game for: "${prompt}".
-
-CRITICAL MECHANICS & UI MASTERY DIRECTIVES:
-1. FULL COMPLETENESS: Output 100% working, unminified, self-contained single-file HTML. Zero placeholders, zero TODOs, zero missing functions.
-2. FLAWLESS GAME MECHANICS & ARCHITECTURE:
-   - GAME LOOP & TIMING:
-     * Implement a rock-solid game state machine: INIT -> START SCREEN -> PLAYING -> PAUSED (Space/P) -> GAME OVER (with instant Restart).
-     * For Snake/Grid games: Use a grid coordinate system (e.g. 20x20), discrete tick timer with directional buffer queue to prevent 180° instant self-collision, safe food spawning (never on snake body), progressive speed ramp-up.
-     * For Arcade/Shooter/Action: 60 FPS requestAnimationFrame with continuous key tracking map (keysDown object) for zero input lag.
-   - CONTROLS & INPUT:
-     * Desktop: Arrow keys + WASD (always execute e.preventDefault() on game keys to stop browser scrolling).
-     * Mobile/Touch: Include responsive on-screen D-pad buttons (▲, ▼, ◀, ▶) and action buttons with touchstart/mousedown listeners.
-   - WEB AUDIO API SYNTHESIZER:
-     * Synthesize procedural 8-bit sound effects using Web Audio API (AudioContext) for: Start, Move/Jump/Action, Score/Eat (+high pitch chirp), Collision/Game Over (-low frequency drop).
-   - PERSISTENCE & HUD:
-     * Real-time Score and High Score persisted in localStorage.
-3. PREMIUM MODERN CYBERPUNK / GLASSMORPHIC AESTHETICS:
-   - Color Palette: Deep obsidian space background (#030712, #0b0f19), neon accents (Emerald #10b981, Cyan #38bdf8, Purple #8b5cf6, Amber #f59e0b).
-   - Glassmorphism: Cards with backdrop-filter: blur(12px), border: 1px solid rgba(255,255,255,0.1), soft glowing box-shadows.
-   - Canvas: Crisp rendering, subtle glowing grid lines, rounded segment rendering, food pulse animation, particle burst on scoring.
-4. Output ONLY the complete, raw HTML code inside a single \`\`\`html codeblock.`;
-    } else if (isPython) {
-        systemInstruction = `You are an elite Principal Python Software Engineer & Algorithm Specialist.
-Your mission is to write clean, robust, highly accurate Python 3 code for: "${prompt}".
-
-CRITICAL LOGICAL & MATHEMATICAL ACCURACY:
-1. EXACT SPECIFICATION ADHERENCE:
-   - If asked to add 6 numbers, add 2 numbers, calculate statistical metrics, solve equations, or implement algorithms, write the exact mathematical computation requested with zero logical errors.
-2. PRODUCTION STRUCTURE:
-   - Modular, clean functions with complete type annotations (from typing import List, Tuple, Optional, Dict) and descriptive docstrings.
-   - Complete interactive execution block under \`if __name__ == "__main__":\` that prompts user input (with automatic fallback/defaults), validates inputs, runs the logic, and prints clear formatted results.
-   - Zero external non-standard dependencies. Rely purely on Python standard library (math, random, sys, time, collections).
-3. Output ONLY the clean, working Python code inside a single \`\`\`python codeblock.`;
-    } else {
-        systemInstruction = `You are an elite Senior Software Engineer. Write clean, concise, exact, working code for: "${prompt}". Output ONLY inside a \`\`\`<language> block.`;
-    }
+    let systemInstruction = isGameOrWeb 
+        ? "You are an elite Principal Software & Game Engine Architect. Generate a 100% complete, runnable, single-file HTML5/CSS/JS app or game for: " + prompt + ". Strict requirements: 60FPS loop, Arrow+WASD keys with e.preventDefault(), on-screen touch D-pad, Web Audio API sound synth, score+high score in localStorage, dark cyber glass UI. Output ONLY complete HTML inside a \x60\x60\x60html block."
+        : (isPython 
+            ? "You are an elite Principal Python Software Engineer. Write exact, robust Python 3 code for: " + prompt + ". Follow exact math instructions, typed functions, docstrings, and an interactive if __name__ == '__main__': block. Output ONLY complete Python inside a \x60\x60\x60python block."
+            : "You are an elite Senior Software Engineer. Write clean, exact code for: " + prompt + ". Output ONLY complete code inside a \x60\x60\x60<language> block.");
 
     const models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "groq/compound-mini"];
     keyLoop:
@@ -651,7 +608,7 @@ CRITICAL LOGICAL & MATHEMATICAL ACCURACY:
                         break keyLoop;
                     }
                 } else if (res.status === 429 || res.status === 401 || res.status === 402) {
-                    console.warn(`Groq Key #${kIdx + 1} status ${res.status}. Auto-shifting to next key...`);
+                    console.warn("Groq Key #" + (kIdx + 1) + " status " + res.status + ". Auto-shifting to next key...");
                     break;
                 }
             } catch(e) {
@@ -662,8 +619,8 @@ CRITICAL LOGICAL & MATHEMATICAL ACCURACY:
 
     if (!generatedCode || generatedCode.length < 20) {
         generatedCode = isPython
-            ? `def solution():\n    # Exact solution for: ${prompt}\n    pass\n`
-            : `<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>App</title><style>body{background:#030712;color:#f8fafc;font-family:sans-serif;padding:30px;}</style></head><body><h1>${prompt}</h1></body></html>`;
+            ? 'def solution():\n    # Exact solution for: ' + prompt + '\n    pass\n'
+            : '<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>App</title><style>body{background:#030712;color:#f8fafc;font-family:sans-serif;padding:30px;}</style></head><body><h1>' + escapeHtml(prompt) + '</h1></body></html>';
     }
 
     currentResultFilePath = targetPath;
@@ -676,9 +633,9 @@ CRITICAL LOGICAL & MATHEMATICAL ACCURACY:
         
         const dv = document.getElementById("diff-viewer");
         if (dv) {
-            let dh = `<div class="diff-header">--- ${escapeHtml(targetPath)} (CREATE) ---</div>`;
-            generatedCode.split("\n").slice(0, 30).forEach(l => { dh += `<span class="diff-addition">+ ${escapeHtml(l)}</span>\n`; });
-            if (generatedCode.split("\n").length > 30) dh += `<span style="color:var(--text-muted)">... ${generatedCode.split("\n").length} lines total</span>`;
+            let dh = '<div class="diff-header">--- ' + escapeHtml(targetPath) + ' (CREATE) ---</div>';
+            generatedCode.split("\n").slice(0, 30).forEach(l => { dh += '<span class="diff-addition">+ ' + escapeHtml(l) + '</span>\n'; });
+            if (generatedCode.split("\n").length > 30) dh += '<span style="color:var(--text-muted)">... ' + generatedCode.split("\n").length + ' lines total</span>';
             dv.innerHTML = dh;
         }
     }, 1000);

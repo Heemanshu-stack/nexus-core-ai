@@ -13,19 +13,28 @@ const GROQ_KEYS = [
 ].filter(Boolean);
 
 function extractCode(raw) {
-  if (!raw) return "";
-  // Strip <think> tags from reasoning models
-  let clean = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").replace(/\u2011/g, "-").trim();
-  const match = clean.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
-  if (match && match[1]) {
-    return match[1].trim();
-  }
-  if (clean.includes("<!DOCTYPE") || clean.includes("<html")) {
-    const start = clean.indexOf("<!DOCTYPE") !== -1 ? clean.indexOf("<!DOCTYPE") : clean.indexOf("<html");
-    const end = clean.lastIndexOf("</html>") !== -1 ? clean.lastIndexOf("</html>") + 7 : clean.length;
-    return clean.substring(start, end).trim();
-  }
-  return clean.trim();
+    if (!raw) return "";
+    let clean = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").replace(/\u2011/g, "-").trim();
+    
+    // Check markdown code fences
+    const match = clean.match(/```(?:python|py|html|javascript|js|css|json|cpp|c|java|bash)?\s*([\s\S]*?)```/i);
+    if (match && match[1] && match[1].trim().length > 10) {
+        return match[1].trim();
+    }
+    
+    // Check HTML documents
+    if (clean.includes("<!DOCTYPE") || clean.includes("<html")) {
+        const s = clean.indexOf("<!DOCTYPE") !== -1 ? clean.indexOf("<!DOCTYPE") : clean.indexOf("<html");
+        const e = clean.lastIndexOf("</html>") !== -1 ? clean.lastIndexOf("</html>") + 7 : clean.length;
+        return clean.substring(s, e).trim();
+    }
+    
+    // Check python code blocks
+    if (clean.includes("def ") || clean.includes("import ") || clean.includes("class ") || clean.includes("print(")) {
+        return clean.trim();
+    }
+    
+    return clean.trim();
 }
 
 async function callGroqLLM(prompt) {
@@ -215,7 +224,7 @@ Follow their feedback precisely and modify the code cleanly. Output ONLY the com
                   { role: "user", content: `Please apply these changes: ${refinePrompt}` }
                 ],
                 temperature: 0.1,
-                max_tokens: 2400
+                max_tokens: 3500
               })
             });
             if (res.status === 200) {
